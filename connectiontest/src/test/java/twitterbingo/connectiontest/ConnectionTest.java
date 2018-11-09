@@ -39,7 +39,6 @@ public class ConnectionTest {
 		}
 	}
 
-
 	@Test
 	public void doConsume() {
 		try (KafkaConsumer<String, String> consumer =
