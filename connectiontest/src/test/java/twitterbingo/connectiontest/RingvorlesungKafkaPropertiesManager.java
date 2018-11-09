@@ -49,7 +49,7 @@ class RingvorlesungKafkaPropertiesManager {
 	}
 
 	private void appendClientKeystore(Properties props) {
-		Path myKeyHomeDir = Paths.get("/Users/gmuehlenberg/.ssh/ringvl_key/bashscript/v3").toAbsolutePath();
+		Path myKeyHomeDir = Paths.get("../certificates").toAbsolutePath();
 
 		//configure the following three settings for SSL Encryption
 		props.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SSL");
