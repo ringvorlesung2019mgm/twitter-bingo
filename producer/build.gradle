@@ -1,0 +1,19 @@
+plugins {
+    id 'java'
+}
+
+group 'de.mgmtp.ringvorlesung'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    compile group: 'org.twitter4j', name: 'twitter4j-core', version: '4.0.4'
+    compile group: 'org.twitter4j', name: 'twitter4j-stream', version: '4.0.4'
+    compile group: 'org.apache.kafka', name: 'kafka-clients', version: '2.0.0'
+}
