@@ -1,3 +1,8 @@
+import producer.KafkaAdapter;
+import producer.PropertyManager;
+import producer.Query;
+import producer.TweetStream;
+
 import java.util.Properties;
 
 public class Main {

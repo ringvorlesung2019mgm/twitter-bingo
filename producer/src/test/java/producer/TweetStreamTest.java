@@ -1,3 +1,5 @@
+package producer;
+
 import org.junit.Assert;
 import org.junit.Test;
 import twitter4j.*;
@@ -48,7 +50,7 @@ public class TweetStreamTest {
         PropertyManager pm = new PropertyManager();
         Properties p = pm.generalProperties();
         TweetStream s = new TweetStream(p.getProperty("twitter.consumer"),p.getProperty("twitter.consumerSecret"),p.getProperty("twitter.token"),p.getProperty("twitter.tokenSecret"));
-        Query q = new Query("love");
+        Query q = new producer.Query("love");
         s.stream(q,sl);
         Assert.assertNotEquals(0,tweetsReceived);
         System.out.printf("Received %d historical tweets\r\n",tweetsReceived);

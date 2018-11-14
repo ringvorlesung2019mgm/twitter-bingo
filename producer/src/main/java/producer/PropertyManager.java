@@ -1,3 +1,5 @@
+package producer;
+
 import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.common.config.SslConfigs;
 
@@ -11,7 +13,7 @@ import java.util.Properties;
 /** Handles all configuration-related stuff.
  *
  */
-class PropertyManager {
+public class PropertyManager {
 
     private static final String private_key_passphrase = "3gQFJ97htSDFV12irydfasgdf34tmlioOUw";
     private static final String server_public_ip = "18.194.145.94";
@@ -38,7 +40,7 @@ class PropertyManager {
         this(CONFIG_PATH);
     }
 
-    Properties allProperties(){
+    public Properties allProperties(){
         Properties p = new Properties();
         p.putAll(generalProperties());
         p.putAll(consumerProperties());
@@ -46,13 +48,13 @@ class PropertyManager {
         return p;
     }
 
-    Properties generalProperties(){
+    public Properties generalProperties(){
         Properties p = new Properties();
         p.putAll(userSettings);
         return p;
     }
 
-    Properties consumerProperties() {
+    public Properties consumerProperties() {
         Properties props = new Properties();
         props.put("bootstrap.servers", server_public_ip + ":9092");
         props.put("ssl.enabled.protocols", "TLSv1.1,TLSv1.2");
@@ -64,7 +66,7 @@ class PropertyManager {
         return props;
     }
 
-    Properties producerProperties() {
+    public Properties producerProperties() {
         Properties props = new Properties();
         props.put("bootstrap.servers", server_public_ip + ":9092");
         props.put("acks", "all");

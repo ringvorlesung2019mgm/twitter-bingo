@@ -1,3 +1,5 @@
+package producer;
+
 import twitter4j.FilterQuery;
 
 /** Represetns a user-query for tweets.
@@ -10,7 +12,7 @@ public class Query {
         this.hashtag = hashtag;
     }
 
-    /** Convert this query to a Twitter4J-Query
+    /** Convert this query to a Twitter4J-producer.Query
      *
      */
     public twitter4j.Query getT4JQuery(){

@@ -1,3 +1,5 @@
+package producer;
+
 import java.util.HashMap;
 import java.util.NoSuchElementException;
 import java.util.Properties;
