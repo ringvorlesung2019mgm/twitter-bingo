@@ -23,4 +23,24 @@ public class Query {
     public FilterQuery getT4JFilterQuery(){
         return new FilterQuery("#"+hashtag);
     }
+
+    @Override
+    public String toString(){
+        return hashtag;
+    }
+
+    @Override
+    public boolean equals(Object o){
+        if(o instanceof Query){
+            if(((Query)o).hashtag == hashtag){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return hashtag.hashCode();
+    }
 }

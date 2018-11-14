@@ -12,11 +12,11 @@ public class TweetStream {
     public TweetStream(String consumer, String consumerSecret, String token, String tokenSecret) {
         AccessToken at = new AccessToken(token,tokenSecret);
 
-        twitterStream = TwitterStreamFactory.getSingleton();
+        twitterStream = new TwitterStreamFactory().getInstance();
         twitterStream.setOAuthConsumer(consumer,consumerSecret);
         twitterStream.setOAuthAccessToken(at);
 
-        twitterClient = TwitterFactory.getSingleton();
+        twitterClient = new TwitterFactory().getInstance();
         twitterClient.setOAuthConsumer(consumer,consumerSecret);
         twitterClient.setOAuthAccessToken(at);
     }

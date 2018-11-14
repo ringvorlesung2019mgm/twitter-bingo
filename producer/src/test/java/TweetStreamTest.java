@@ -56,7 +56,7 @@ public class TweetStreamTest {
         System.out.println("Finished historical tweets. Starting stream.");
         System.out.flush();
         try {
-            Thread.sleep(3000);
+            Thread.sleep(5000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

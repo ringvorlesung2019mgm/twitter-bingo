@@ -1,6 +1,7 @@
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.common.TopicPartition;
 import org.junit.Assert;
 import org.junit.Test;
 import twitter4j.*;
@@ -10,12 +11,14 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Properties;
 
+import static java.lang.System.out;
+
 public class KafkaAdapterTest {
 
     private static final String TESTTOPIC = "my-topic";
 
     @Test
-    public void pubSubTweet(){
+    public void testPubSubTweet(){
         Properties props = new PropertyManager().producerProperties();
         KafkaAdapter ad = new KafkaAdapter(props,TESTTOPIC);
 
@@ -196,16 +199,22 @@ public class KafkaAdapterTest {
             }
         };
 
-        ad.onStatus(s);
-
         KafkaConsumer<String,String> cons = new KafkaConsumer<>(new PropertyManager().consumerProperties());
 
         cons.subscribe(Collections.singletonList(TESTTOPIC));
-        cons.seekToBeginning(cons.assignment());
-        ConsumerRecords<String, String> consumerRecords = cons.poll(Duration.ofSeconds(3L));
+        //dummy poll. Waits for the assignment to finish
+        cons.poll(Duration.ofMillis(1000));
+        cons.seekToEnd(cons.assignment());
+        //seek is lazy. Needs to be followed by poll or position to actually do anything
+        cons.position((TopicPartition)cons.assignment().toArray()[0]);
+
+
+        ad.onStatus(s);
+
+        ConsumerRecords<String, String> consumerRecords = cons.poll(Duration.ofSeconds(10L));
         Assert.assertNotEquals(0,consumerRecords.count());
         for(ConsumerRecord<String,String> r : consumerRecords){
-            System.out.println(r.value());
+            out.println(r.value());
         }
 
     }

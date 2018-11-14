@@ -38,6 +38,14 @@ class PropertyManager {
         this(CONFIG_PATH);
     }
 
+    Properties allProperties(){
+        Properties p = new Properties();
+        p.putAll(generalProperties());
+        p.putAll(consumerProperties());
+        p.putAll(producerProperties());
+        return p;
+    }
+
     Properties generalProperties(){
         Properties p = new Properties();
         p.putAll(userSettings);
