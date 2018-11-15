@@ -1,1 +1,21 @@
 language: java
+
+jdk:
+  - openjdk8
+stages:
+  - test
+
+jobs:
+  include:
+    - stage: test
+      install:
+        - cd producer
+        - ./gradlew assemble
+      before_script:
+        - echo "$CONFIG_FILE" >> config.properties
+        - mkdir certificates
+        - echo "$KEYSTORE" | base64 -d > certificates/kafka.client.keystore.jks
+        - echo "$TRUSTSTORE" | base64 -d > certificates/kafka.client.truststore.jks
+      script:
+        - cd producer
+        - ./gradlew check
