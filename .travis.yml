@@ -11,6 +11,7 @@ jobs:
       install:
         - cd producer
         - ./gradlew assemble
+        - cd ../
       before_script:
         - echo "$CONFIG_FILE" >> config.properties
         - mkdir certificates
