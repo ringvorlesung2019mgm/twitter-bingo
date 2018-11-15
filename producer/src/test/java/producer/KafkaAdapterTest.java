@@ -12,6 +12,7 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Properties;
+import java.util.concurrent.TimeoutException;
 
 import static java.lang.System.out;
 
@@ -204,8 +205,7 @@ public class KafkaAdapterTest {
         KafkaConsumer<String,String> cons = new KafkaConsumer<>(new PropertyManager().consumerProperties());
 
         cons.subscribe(Collections.singletonList(TESTTOPIC));
-        //dummy poll. Waits for the assignment to finish
-        cons.poll(Duration.ofMillis(1000));
+        waitForAssignments(cons,10000);
         cons.seekToEnd(cons.assignment());
         //seek is lazy. Needs to be followed by poll or position to actually do anything
         cons.position((TopicPartition)cons.assignment().toArray()[0]);
@@ -219,5 +219,22 @@ public class KafkaAdapterTest {
             out.println(r.value());
         }
 
+    }
+
+    /** Wait until the list of assignments for the consumer is not longer empty
+     *
+     * @param cons The consumer
+     * @param timeout Timeout in milliseconds after which to give up
+     */
+    private void waitForAssignments(KafkaConsumer cons, long timeout){
+        long waited = 0;
+        while(waited < timeout){
+            cons.poll(Duration.ofMillis(100));
+            if (cons.assignment().size() > 0){
+                return;
+            }
+            waited++;
+        }
+        throw new IllegalStateException("Consumer did not get assignments in time");
     }
 }
