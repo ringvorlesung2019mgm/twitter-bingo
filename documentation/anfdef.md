@@ -1,5 +1,17 @@
 ## Anforderungsdefinition
 
+#### Userstory
+
+* Als Nutzer möchte ich gerne wissen wie die Meinung zu den Freitags und Samstags-konzerten eines Festival ist, denn ich habe eine Tageskarte für Sonntag.
+* Dafür betrete ich die Webseite, gebe dort den offiziellen HashTag des Festivals an.
+Prototyp-Story:
+* Ich bekomme eine Liste der Tweets inkl. Stimmungsanalyse (als eingefärbte Zahl), die sich aktualisiert. Die Tweets der letzten sieben Tage sind enthalten.
+Ausbau-Story: 
+* Danach bekomme ich eine Grafik anzeigt.
+* Auf dieser Grafik kann ich sehen, das die meisten Tweets zu dem offiziellen HashTag bis Freitag Abend positiv geprägt waren danach sinkt die Stimmung kontinuierlich.
+* Bei den Beispieltweets sehe ich das jemand das Line-Up am Freitag lobt.
+* Bei den Beispieltweets sehe ich auch jemand schriebt das es am Samstag technische Probleme bei dem Ton gibt.
+
 #### Vorstellung Ist-Zustand
 
 Einige Bestandteile der Architektur sind durch den Kunden vorgegeben. 
