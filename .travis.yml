@@ -13,7 +13,7 @@ jobs:
         - ./gradlew assemble
         - cd ../
       before_script:
-        - echo "$CONFIG_FILE" >> config.properties
+        - echo "$CONFIG_FILE" | base64 -d >> config.properties
         - mkdir certificates
         - echo "$KEYSTORE" | base64 -d > certificates/kafka.client.keystore.jks
         - echo "$TRUSTSTORE" | base64 -d > certificates/kafka.client.truststore.jks
