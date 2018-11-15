@@ -20,3 +20,7 @@ jobs:
       script:
         - cd producer
         - ./gradlew check
+
+notifications:
+  slack:
+    secure: 2fvJmnos9G4JMD8lAGT+MdwBScku1WQ5NMqDBwzrXq1UbpkeX8Ds3aahBsRlXbS79Hz7JQDPT8/ui1UN+w5ielBCiOQrdY4YLQt88ljU6ghgunTvlZ1BR2m0xyIaDshnT6CX27SzlTzuXiQuk+cPWvBw/qg1y6cjUyqhzzNHuhJuQWFktCAtL2jpk/Vo154wdwRqmIXyEolSdk4ObclKWeX+LIfF8r0+mECsUIKtiYkFXZ+Zvek0JeHqs7vqLn71FPrbgpBvwA5nBz3Mvau2zM+YW5DeYNKX72KL6dgSbKm8hWxXlRqD+jEQhWhp8VUmbeedOFwHwrrIl9oXavULyLji+A5BRDCmQP2SJBxe4nHYkMdTczH2cXKKv+fbTYOm5YhvDFuIvro61vB9gEPagt5/nJPa8nXZM5WynJ3Ttb3BR7zZPIGaowbZuA8HIus3bZnsWLbkg+Ath4dNDRMqsqduyviDzWflQHKz2Z0QdISmZb57yp2OvEtjCKKp7UnuL1R5+MrX794/sCLnf7puVc4ikeZRE3679E2oL2EjYvwgLVCtA0ykrC9YF3pCZlXKs4MxgvIO7w+2n9sQDaJVi45fbyWEur6MOvPDgxYOUXJQAdeAdQRPaE3yyeXyZTQ8uObx3K+8MHnxeUSSM9GteBENs86AeQ1YCdqrCSXjAA0=
