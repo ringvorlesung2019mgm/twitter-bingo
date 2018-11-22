@@ -19,12 +19,7 @@ def get_tweet_sentiment(tweet):
     # create TextBlob object of passed tweet text
     analysis = TextBlob(clean_tweet(tweet))
     # set sentiment
-    if analysis.sentiment.polarity > 0:
-        return 'positive'
-    elif analysis.sentiment.polarity == 0:
-        return 'neutral'
-    else:
-        return 'negative'
+    return analysis.sentiment.polarity
 
 def get_de_tweet_sentiment(tweet):
     '''
@@ -34,12 +29,7 @@ def get_de_tweet_sentiment(tweet):
     # create TextBlob object of passed tweet text
     analysis = TextBlobDE(clean_tweet(tweet))
     # set sentiment
-    if analysis.sentiment.polarity > 0:
-        return 'positive'
-    elif analysis.sentiment.polarity == 0:
-        return 'neutral'
-    else:
-        return 'negative'
+    return analysis.sentiment.polarity
 
 
 if __name__ == '__main__':
