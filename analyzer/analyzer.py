@@ -50,7 +50,7 @@ def wait_for_assignment(consumer,message=None):
             print(message)
         time.sleep(1)
 
-def main(input_topic_pattern,outout_topic_sfx=outout_topic_sfx,group_id=group_id,seek=False,stop_event=None):
+def main(input_topic_pattern,outout_topic_sfx=outout_topic_sfx,group_id=group_id,seek=False,stop_event=None,start_event=None):
     conf = read_config(open("../config.properties"))
 
     sslctx = create_sslcontext(conf["ssl.keystore.password"])
@@ -77,6 +77,9 @@ def main(input_topic_pattern,outout_topic_sfx=outout_topic_sfx,group_id=group_id
     if seek == "end":
         consumer.seek_to_end()
         consumer.poll(0)
+
+    if start_event:
+        start_event.set()
 
     while True:
         for msg in consumer:

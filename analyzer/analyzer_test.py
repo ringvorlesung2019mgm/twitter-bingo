@@ -54,11 +54,12 @@ def test_analyzer():
     consumer.poll(0)
 
     stopEvent = threading.Event()
+    startEvent = threading.Event()
 
-    analyzerThread = threading.Thread(target=main,args=(inppattern,"-analyzed","analyzers","end",stopEvent))
+    analyzerThread = threading.Thread(target=main,args=(inppattern,"-analyzed","analyzers","end",stopEvent,startEvent))
     analyzerThread.start()
 
-    time.sleep(3)
+    startEvent.wait()
     producer.send(inp,testvalue)
     producer.flush()
 
