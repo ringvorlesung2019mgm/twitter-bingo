@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script
+            src="https://code.jquery.com/jquery-3.3.1.js"
+            integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
+            crossorigin="anonymous"></script>
+    <title>Title</title>
+</head>
+<body>
+<div id="counter">
+</div>
+</body>
+
+<script>
+    $(document).ready(function(){
+        console.log("Started");
+
+
+	// based on https://stackoverflow.com/questions/33635919/xmlhttprequest-chunked-response-only-read-last-response-in-progress
+
+	var last_index = 0;
+        var xhr = new XMLHttpRequest()
+        xhr.open("GET", "http://localhost:8080/producer/TweetStreamDemo", true)
+        xhr.onprogress = function () {
+	    var curr_index = xhr.responseText.length;
+	    if (last_index == curr_index) return; 
+	    var s = xhr.responseText.substring(last_index, curr_index);
+	    last_index = curr_index;
+	    s = s.replace(/\r\n/gm,"");
+	    	if( s != ""){
+			console.log(s);
+	    		console.log("PROGRESS:", s);   
+	    		$("#counter").append("<p>" + s + "<p>");
+		}else{
+			console.log("KeepAlive Received");
+		}
+
+	}
+        xhr.send()
+
+    });
+</script>
+
+</html>

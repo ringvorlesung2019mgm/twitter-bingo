@@ -24,4 +24,6 @@ dependencies {
 apply plugin: 'war'
 apply from: 'https://raw.github.com/akhikhl/gretty/master/pluginScripts/gretty.plugin'
 
-
+gretty {
+    servletContainer = 'tomcat8'
+}

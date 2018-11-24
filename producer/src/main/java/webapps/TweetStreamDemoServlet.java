@@ -17,8 +17,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Properties;
 
-@WebServlet("/TweetStream")
-public class TweetServlet extends HttpServlet{
+@WebServlet("/TweetStreamDemo")
+public class TweetStreamDemoServlet extends HttpServlet{
 
     public void doGet(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
