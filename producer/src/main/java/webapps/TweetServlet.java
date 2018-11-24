@@ -23,22 +23,13 @@ public class TweetServlet extends HttpServlet{
     public void doGet(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
 
+        response.setHeader("Access-Control-Allow-Origin", "*");
         response.setHeader("Transfer-Encoding", "chunked");
-
- /*       for(int i = 0; i < 100; i++){
-            response.getWriter().write("Test"+i+"\r\n");
-            response.getWriter().flush();
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }*/
 
         StatusListener sl = new StatusListener() {
             @Override
             public void onStatus(Status status) {
-                System.out.println(status.getText());
+                // System.out.println(status.getText());
                 try {
                     response.getWriter().write(status.getText()+ "\r\n");
                     response.getWriter().flush();
@@ -79,6 +70,7 @@ public class TweetServlet extends HttpServlet{
         Query q = new producer.Query("love");
         s.stream(q,sl);
 
+        System.out.println("Service Stopped!");
     }
 
 }
