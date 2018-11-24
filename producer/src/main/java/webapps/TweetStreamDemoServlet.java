@@ -5,10 +5,7 @@ package webapps;
 import producer.PropertyManager;
 import producer.Query;
 import producer.TweetStream;
-import twitter4j.StallWarning;
-import twitter4j.Status;
-import twitter4j.StatusDeletionNotice;
-import twitter4j.StatusListener;
+import twitter4j.*;
 
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -16,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Properties;
+import java.util.Random;
 
 @WebServlet("/TweetStreamDemo")
 public class TweetStreamDemoServlet extends HttpServlet{
@@ -31,9 +29,15 @@ public class TweetStreamDemoServlet extends HttpServlet{
             public void onStatus(Status status) {
                 // System.out.println(status.getText());
                 try {
-                    response.getWriter().write(status.getText()+ "\r\n");
+                    Random random = new Random();
+                    JSONObject obj = new JSONObject();
+                    obj.put("status", status.getText());
+                    obj.put("rating", (random.nextDouble() - 0.5) * 50);
+                    response.getWriter().write(obj.toString() + "\r\n");
                     response.getWriter().flush();
                 } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
@@ -72,17 +76,17 @@ public class TweetStreamDemoServlet extends HttpServlet{
 
         System.out.println("Keep Alive started!");
 
-        for(int i = 0; i < 10000; i++){
+        while(true){
             response.getWriter().write("\r\n");
             response.getWriter().flush();
             try {
-                Thread.sleep(10);
+                Thread.sleep(100);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
 
-        System.out.println("Service Stopped!");
+        // System.out.println("Service Stopped!");
     }
 
 }
