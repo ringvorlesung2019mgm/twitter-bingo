@@ -70,6 +70,18 @@ public class TweetServlet extends HttpServlet{
         Query q = new producer.Query("love");
         s.stream(q,sl);
 
+        System.out.println("Keep Alive started!");
+
+        for(int i = 0; i < 10000; i++){
+            response.getWriter().write("\r\n");
+            response.getWriter().flush();
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
         System.out.println("Service Stopped!");
     }
 
