@@ -51,6 +51,22 @@ blockquote.twitter-tweet a:hover, blockquote.twitter-tweet a:focus {
 	text-decoration: underline;
 }
 
+.sentiment-number {
+	style ="float: right";
+	margin: 0px;
+	padding: 12px 16px 10px 16px;
+	margin: 10px 0px 0px 4px;
+	float: left;
+	background-color:green;
+    display: flex;
+    justify-content:center;
+    align-content:center;
+    flex-direction:column; 
+    border-radius:50%;
+    color:white;
+    font-weight: bold;
+}
+
 .tweet-window {
 	border-color: black;
 	border-width: 2px;
@@ -64,19 +80,6 @@ blockquote.twitter-tweet a:hover, blockquote.twitter-tweet a:focus {
 	padding: 10px;
 }
 
-.sentiment-number {
-	style ="float: left;
-	margin: 0px;
-	padding: 12px 16px 10px 16px;
-	margin: 10px 0px 0px 4px;
-	float: left;
-	background-color:green;
-    display: flex;
-    justify-content:center;
-    align-content:center;
-    flex-direction:column; 
-    border-radius:50%;
-    color:white;
-    font-weight: bold;
+
 	
 }
