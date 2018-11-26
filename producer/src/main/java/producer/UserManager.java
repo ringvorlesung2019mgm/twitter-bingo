@@ -21,18 +21,20 @@ public class UserManager {
         userMap = new HashMap<>();
         final Runnable keepAlive = () -> {
             System.out.println(userMap.values());
-
             for(TwingoUser user : userMap.values()){
-                try {
-                    // TODO check for response status != 200 and remove user
-                    user.response.getWriter().write("\r\n");
-                    user.response.getWriter().flush();
-                } catch (IOException e) {
-                    e.printStackTrace();
+                if(user.response.getStatus() != 200){
+                    user.setInactive();
+                }else {
+                    try {
+                        user.response.getWriter().write("\r\n");
+                        user.response.getWriter().flush();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         };
-        final ScheduledFuture<?> beeperHandle = scheduler.scheduleAtFixedRate(keepAlive, 0, 100, TimeUnit.MILLISECONDS);
+        scheduler.scheduleAtFixedRate(keepAlive, 0, 500, TimeUnit.MILLISECONDS);
     }
 
     public static UserManager getInstance(){
@@ -50,6 +52,10 @@ public class UserManager {
 
     public void removeUser(String userId){
         userMap.remove(userId);
+    }
+
+    public int getUserCount(){
+        return userMap.values().size();
     }
 
 
