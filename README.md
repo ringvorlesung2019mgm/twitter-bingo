@@ -16,9 +16,22 @@ ssl.keystore.password = thepasswordforyourcertificates
 
 You will also need to create a directory named certificates containing a file kafka.client.keystore.jks (with the certificate+key to connect to kafka) and kafka.client.truststore.jks (with the CA-certifikates needed for the server). Both files need to be in the PKCS12-Format. Python can't use pkcs12-certificates and will therefore automatically create a copy of the certificates as PEM-files in the same directory.
 
+## Running tests
+
+```
+cd producer && ./gradlew test
+cd ..
+cd analyzer && pytest
+cd ..
 ```
 
-After this you can run the tests by going to the producer-directory and running:  
+## Running the software
+Analyzer:
 ```
-./gradlew test
+cd analyzer && python3 analyzer.py
+```
+
+Producer+Webapp:
+```
+cd producer && ./gradlew appRun
 ```

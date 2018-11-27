@@ -52,7 +52,7 @@ In Zukunft können weitere Filterkriterien (z.b. geokoordinaten) ergänzt werden
 Der Analyzer liest die Tweets die der Producer in die verschiedenen Topics geschrieben hat und führt eine Sentiment-Analyse darauf aus.
 Der Tweet (erweitert um das Ergebnis der Analyse) wird anschließend wieder (in ein neues topic) in Kafka gespeichert. Die ursprünglliche Zuordnung der Tweets zu unterschiedlichen Topics muss dabei natürlich erhalten bleiben.
 
-Das topic der verarbeiteten tweets entspricht den der rohtweets mit dem Suffix "-analyzed"
+Das topic der verarbeiteten tweets entspricht nahezu dem der rohtweets, allerdings wird das prefix "UNI_tweets_" durch "UNI_analyzed-tweets_" ersetzt.
 
 Sollte sich herausstellen das die Sentiment-Analyse ein Performance-Engpass ist, da Tweets stellenweise mehrfach analysiert werden (z.B. da sie mehrere Hashtags enthalten und somit mehreren verschiedenen Filterkriterien entsprechen) könnte man einen Cache-Server (Memcached, Redis) hinzuziehen.
 

@@ -1,6 +1,7 @@
 from analyzer import *
 import socket
 import threading
+import json
 
 def test_read_config():
     teststring = """
@@ -27,8 +28,8 @@ def test_sslcontext():
 def test_analyzer():
     inp = "raw-testtopic"
     outp = "analyzed-testtopic"
-    testvalue = "My-test".encode()
-    expected = "My-test : 0.0".encode()
+    testvalue = json.dumps({"text": "My-test"}).encode()
+    expected = json.dumps({"text": "My-test","rating":0.0,"isRated": True}).encode()
 
     conf = read_config(open("../config.properties"))
     sslctx = create_sslcontext(conf["ssl.keystore.password"])

@@ -5,6 +5,7 @@ import time
 from sentimentanalysis import *
 from convertcerts import pkcs12_to_pem
 import argparse
+import json
 
 group_id = "analyzers" 
 
@@ -84,12 +85,19 @@ def main(input_topic_prefix,outout_topic_prefix,group_id=group_id,seek=False,sto
 
     while True:
         for msg in consumer:
-            tweet = msg.value.decode()
-            sentiment = str(get_tweet_sentiment(tweet))
+            try:
+                tweet = json.loads(msg.value.decode())
+            except json.JSONDecodeError:
+                if debug:
+                    print("Warning:",msg.value.decode(),"is no valid json")
+                continue
+            sentiment = get_tweet_sentiment(tweet["text"])
+            tweet["rating"]=sentiment
+            tweet["isRated"]=True
             newtopic = msg.topic.replace(input_topic_prefix,outout_topic_prefix)
-            producer.send(newtopic,value=(tweet+" : "+sentiment).encode("UTF-8"))
+            producer.send(newtopic,value=json.dumps(tweet).encode("UTF-8"))
             if debug:
-                print ("From:",msg.topic,"To:",newtopic, " : ",tweet," : ",sentiment)
+                print ("From:",msg.topic,"To:",newtopic, " : ",tweet)
             if stop_event:
                 if stop_event.isSet():
                     break
