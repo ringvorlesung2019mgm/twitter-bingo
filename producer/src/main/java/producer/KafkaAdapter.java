@@ -31,9 +31,13 @@ public class KafkaAdapter implements StatusListener {
 
     @Override
     public void onStatus(Status status) {
-        ProducerRecord<String,String> pr = new ProducerRecord<>(topic,status.getText());
-        producer.send(pr);
-        producer.flush();
+        // TODO find out why status can be null
+        if(status != null) {
+            TwingoTweet twingoTweet = TwingoTweet.fromStatus(status);
+            ProducerRecord<String, String> pr = new ProducerRecord<>(topic, twingoTweet.toJSON());
+            producer.send(pr);
+            producer.flush();
+        }
     }
 
     @Override

@@ -41,46 +41,46 @@ public class TweetStreamServlet extends HttpServlet {
         m.addStream(query);
 
         // create demo consumer
-        KafkaConsumer<String,String> cons = new KafkaConsumer<>(pm.consumerProperties());
+        KafkaConsumer<String, String> cons = new KafkaConsumer<>(pm.consumerProperties());
         cons.subscribe(Collections.singletonList(kafkaTopic));
 
         // read from consumer and write to frontend
         // TODO make fancy
-        while(!response.getWriter().checkError()){
+        while (!response.getWriter().checkError()) {
 
-            waitForAssignments(cons,10000);
+            waitForAssignments(cons, 10000);
             cons.seekToEnd(cons.assignment());
             ConsumerRecords<String, String> consumerRecords = cons.poll(Duration.ofSeconds(10L));
 
-            for(ConsumerRecord record : consumerRecords.records(kafkaTopic)){
-
+            for (ConsumerRecord record : consumerRecords.records(kafkaTopic)) {
+                TwingoTweet twingoTweet = TwingoTweet.fromJson(record.value().toString());
                 // generate random analyser rating
-                Random random = new Random();
-                JSONObject obj = new JSONObject();
                 try {
-                    obj.put("status", record.value());
-                    obj.put("rating", (random.nextDouble() - 0.5) * 50);
-                } catch (JSONException e) {
+
+                    Random random = new Random();
+                    twingoTweet.setRating((random.nextDouble() - 0.5) * 50);
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
-                response.getWriter().write(obj.toString() + "\r\n");
+                response.getWriter().write(twingoTweet.toJSON() + "\r\n");
                 response.getWriter().flush();
-                System.out.println("Sent " + obj.toString());
 
             }
         }
     }
 
-    /** Wait until the list of assignments for the consumer is not longer empty
+    /**
+     * Wait until the list of assignments for the consumer is not longer empty
      * TODO move to utilty because it is used in test and here
-     * @param cons The consumer
+     *
+     * @param cons    The consumer
      * @param timeout Timeout in milliseconds after which to give up
      */
-    private void waitForAssignments(KafkaConsumer cons, long timeout){
+    private void waitForAssignments(KafkaConsumer cons, long timeout) {
         long waited = 0;
-        while(waited < timeout){
+        while (waited < timeout) {
             cons.poll(Duration.ofMillis(100));
-            if (cons.assignment().size() > 0){
+            if (cons.assignment().size() > 0) {
                 return;
             }
             waited++;

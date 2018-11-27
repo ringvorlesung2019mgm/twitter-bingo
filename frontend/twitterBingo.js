@@ -29,7 +29,7 @@ var myApp = angular.module('myApp', ['ngtweet']);
 			console.log(s);
 	    		console.log("PROGRESS:", s); 
 			s = JSON.parse(s)  
-	    		$("#content").append("<blockquote class=\"twitter-tweet\"><p dir=\"ltr\">" + s.status + "</p>" + s.rating + "</blockquote>");
+	    		$("#content").append("<blockquote class=\"twitter-tweet\"><p dir=\"ltr\">" + s.text + "</p>" + s.rating + "</blockquote>");
 		}else{
 			console.log("KeepAlive Received");
 		}
