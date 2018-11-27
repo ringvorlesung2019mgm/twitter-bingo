@@ -25,9 +25,8 @@ def test_sslcontext():
     wrappedSocket.close()
 
 def test_analyzer():
-    inp = "analyzer-testtopic"
-    inppattern = "^analyzer-testtopic$"
-    outp = "analyzer-testtopic-analyzed"
+    inp = "raw-testtopic"
+    outp = "analyzed-testtopic"
     testvalue = "My-test".encode()
     expected = "My-test : 0.0".encode()
 
@@ -47,8 +46,14 @@ def test_analyzer():
     ssl_context=sslctx
     )
 
-    consumer.subscribe(topics=(outp,))
+    consumer.subscribe(pattern="^"+outp+".*")
+
+    # Push messages to all needed topics to create them if needed
     producer.send(outp,"Create topic".encode())
+    producer.send(inp,"Create topic".encode())
+    producer.flush()
+    time.sleep(1)
+
     wait_for_assignment(consumer,"Test waiting for assignment")
     consumer.seek_to_end()
     consumer.poll(0)
@@ -56,13 +61,23 @@ def test_analyzer():
     stopEvent = threading.Event()
     startEvent = threading.Event()
 
-    analyzerThread = threading.Thread(target=main,args=(inppattern,"-analyzed","analyzers","end",stopEvent,startEvent))
+    analyzerThread = threading.Thread(target=main,args=(inp,outp,"analyzers","end",stopEvent,startEvent,True))
     analyzerThread.start()
 
     startEvent.wait()
-    producer.send(inp,testvalue)
+    producer.send(inp+"-1",testvalue)
+    producer.send(inp+"-2",testvalue)
     producer.flush()
 
+    resplist=[]
     resp = consumer.poll(20000)
+    resplist.extend(list(resp.values())[0])
+
+    # if poll returned only one result, poll again
+    if len(resplist) < 2:
+        resp = consumer.poll(20000)
+        resplist.extend(list(resp.values())[0])
+
     stopEvent.set()
-    assert list(resp.values())[0][0].value == expected
+    assert resplist[0].value == expected
+    assert resplist[1].value == expected

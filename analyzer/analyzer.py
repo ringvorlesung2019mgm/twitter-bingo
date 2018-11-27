@@ -4,8 +4,8 @@ import ssl
 import time
 from sentimentanalysis import *
 from convertcerts import pkcs12_to_pem
+import argparse
 
-outout_topic_sfx = "-analyzed"
 group_id = "analyzers" 
 
 """
@@ -50,7 +50,7 @@ def wait_for_assignment(consumer,message=None):
             print(message)
         time.sleep(1)
 
-def main(input_topic_pattern,outout_topic_sfx=outout_topic_sfx,group_id=group_id,seek=False,stop_event=None,start_event=None):
+def main(input_topic_prefix,outout_topic_prefix,group_id=group_id,seek=False,stop_event=None,start_event=None,debug=False):
     conf = read_config(open("../config.properties"))
 
     sslctx = create_sslcontext(conf["ssl.keystore.password"])
@@ -69,7 +69,8 @@ def main(input_topic_pattern,outout_topic_sfx=outout_topic_sfx,group_id=group_id
     ssl_context=sslctx
     )
 
-    consumer.subscribe(pattern=input_topic_pattern)
+    pattern = "^"+input_topic_prefix+".*"
+    consumer.subscribe(pattern=pattern)
     wait_for_assignment(consumer,"Analyzer waiting for assignments")
 
     if seek == "begin":
@@ -85,11 +86,31 @@ def main(input_topic_pattern,outout_topic_sfx=outout_topic_sfx,group_id=group_id
         for msg in consumer:
             tweet = msg.value.decode()
             sentiment = str(get_tweet_sentiment(tweet))
-            producer.send(msg.topic+outout_topic_sfx,value=(tweet+" : "+sentiment).encode("UTF-8"))
-            print (msg.topic, " : ",tweet," : ",sentiment)
+            newtopic = msg.topic.replace(input_topic_prefix,outout_topic_prefix)
+            producer.send(newtopic,value=(tweet+" : "+sentiment).encode("UTF-8"))
+            if debug:
+                print ("From:",msg.topic,"To:",newtopic, " : ",tweet," : ",sentiment)
             if stop_event:
                 if stop_event.isSet():
                     break
         if stop_event:
             if stop_event.isSet():
                 break
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Analyze messages from kafka')
+    parser.add_argument('--input_prefix', type=str, help='The prefix all monitored topics start with', default="UNI_tweets_")
+    parser.add_argument('--output_prefix', type=str, help='The string to replace the input-prefix with to obtain the output topic for a tweet', default="UNI_analyzed-tweets_")
+    parser.add_argument('--group_id', type=str, help='The if of the consumer-group this consumer belongs to', default=group_id)
+    parser.add_argument('--seek', type=str, help='Seek to "begin", "end" or "none" when starting up.', default="none")
+    parser.add_argument('--debug', type=bool, help='Print debug infos (like analyzed messages)', default=False)
+    
+    args = parser.parse_args()
+    print(args)
+
+    print("Starting analyser...")
+    main(args.input_prefix,
+         args.output_prefix,
+         group_id=args.group_id,
+         seek=args.seek,
+         debug=args.debug)
