@@ -1,4 +1,4 @@
-package webapps;
+package webapps.api;
 
 
 
@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.util.Properties;
 import java.util.Random;
 
-@WebServlet("/TweetStreamDemo")
+@WebServlet("/api/TweetStreamDemo")
 public class TweetStreamDemoServlet extends HttpServlet{
 
     public void doGet(HttpServletRequest request, HttpServletResponse response)
