@@ -63,42 +63,6 @@ public class TwingoTweet {
         return new Gson().fromJson(json, TwingoTweet.class);
     }
 
-    public long getId() {
-        return id;
-    }
-
-    public String getText() {
-        return text;
-    }
-
-    public String getUserName() {
-        return userName;
-    }
-
-    public Date getCreatedAt() {
-        return createdAt;
-    }
-
-    public boolean isHasGeo() {
-        return hasGeo;
-    }
-
-    public double getGeoLat() {
-        return geoLat;
-    }
-
-    public double getGeoLon() {
-        return geoLon;
-    }
-
-    public boolean isRated() {
-        return isRated;
-    }
-
-    public double getRating() {
-        return rating;
-    }
-
     public void setRating(double rating) throws Exception {
         if (!isRated) {
             this.rating = rating;
