@@ -1,4 +1,4 @@
-package webapps;
+package webapps.api;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -19,7 +19,7 @@ import java.util.Properties;
 import java.util.Random;
 
 
-@WebServlet("/TweetStream")
+@WebServlet("/api/TweetStream")
 public class TweetStreamServlet extends HttpServlet {
 
     PropertyManager pm = new PropertyManager();
@@ -27,13 +27,14 @@ public class TweetStreamServlet extends HttpServlet {
 
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
+        // get parameters from request
+        String id = request.getSession().getId();
+        String hashtag = request.getParameter("hashtag");
+
         // set headers for chunked transfer encoding stream
         response.setHeader("Access-Control-Allow-Origin", "*");
         response.setHeader("Transfer-Encoding", "chunked");
 
-        // get parameters from request
-        String id = request.getParameter("id");
-        String hashtag = request.getParameter("hashtag");
         Query query = new producer.Query(hashtag);
         String kafkaTopic = m.topicFromQuery(query);
 
@@ -56,7 +57,6 @@ public class TweetStreamServlet extends HttpServlet {
                 TwingoTweet twingoTweet = TwingoTweet.fromJson(record.value().toString());
                 // generate random analyser rating
                 try {
-
                     Random random = new Random();
                     twingoTweet.setRating((random.nextDouble() - 0.5) * 50);
                 } catch (Exception e) {
