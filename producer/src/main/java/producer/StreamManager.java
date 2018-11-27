@@ -44,7 +44,7 @@ public class StreamManager {
         return streams.size();
     }
 
-    private String topicFromQuery(Query q){
+    public String topicFromQuery(Query q){
         return "uni_"+q.toString();
     }
 }

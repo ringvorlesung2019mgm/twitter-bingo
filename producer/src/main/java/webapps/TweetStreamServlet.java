@@ -22,45 +22,39 @@ import java.util.Random;
 @WebServlet("/TweetStream")
 public class TweetStreamServlet extends HttpServlet {
 
-    private UserManager userManager = UserManager.getInstance();
-    private PropertyManager pm = new PropertyManager();
-    private Properties p = pm.generalProperties();
+    PropertyManager pm = new PropertyManager();
+    StreamManager m = new StreamManager(pm.allProperties());
 
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-
-        // get parameters from request
-        String id = request.getParameter("id");
-        String hashtag = request.getParameter("hashtag");
 
         // set headers for chunked transfer encoding stream
         response.setHeader("Access-Control-Allow-Origin", "*");
         response.setHeader("Transfer-Encoding", "chunked");
 
-        // create user
-        TwingoUser twingoUser = userManager.addUser(id, hashtag, request, response);
+        // get parameters from request
+        String id = request.getParameter("id");
+        String hashtag = request.getParameter("hashtag");
+        Query query = new producer.Query(hashtag);
+        String kafkaTopic = m.topicFromQuery(query);
 
-        String kafkaTopicName = "UNI_tweets_" + hashtag + "__";
-        KafkaAdapter ad = new KafkaAdapter(pm.producerProperties(),kafkaTopicName);
+        // create stream from query
+        m.addStream(query);
 
-        TweetStream s = new TweetStream(p.getProperty("twitter.consumer"),p.getProperty("twitter.consumerSecret"),p.getProperty("twitter.token"),p.getProperty("twitter.tokenSecret"));
-        Query q = new producer.Query("love");
-        s.stream(q,ad);
+        // create demo consumer
+        KafkaConsumer<String,String> cons = new KafkaConsumer<>(pm.consumerProperties());
+        cons.subscribe(Collections.singletonList(kafkaTopic));
 
-        KafkaConsumer<String,String> cons = new KafkaConsumer<>(new PropertyManager().consumerProperties());
+        // read from consumer and write to frontend
+        // TODO make fancy
+        while(!response.getWriter().checkError()){
 
-        cons.subscribe(Collections.singletonList(kafkaTopicName));
-
-
-        while(twingoUser.isActive()){
             waitForAssignments(cons,10000);
             cons.seekToEnd(cons.assignment());
-            //seek is lazy. Needs to be followed by poll or position to actually do anything
-            // cons.position((TopicPartition)cons.assignment().toArray()[0]);
-
             ConsumerRecords<String, String> consumerRecords = cons.poll(Duration.ofSeconds(10L));
 
-            for(ConsumerRecord record : consumerRecords.records(kafkaTopicName)){
+            for(ConsumerRecord record : consumerRecords.records(kafkaTopic)){
 
+                // generate random analyser rating
                 Random random = new Random();
                 JSONObject obj = new JSONObject();
                 try {
@@ -71,13 +65,14 @@ public class TweetStreamServlet extends HttpServlet {
                 }
                 response.getWriter().write(obj.toString() + "\r\n");
                 response.getWriter().flush();
+                System.out.println("Sent " + obj.toString());
 
             }
         }
     }
 
     /** Wait until the list of assignments for the consumer is not longer empty
-     *
+     * TODO move to utilty because it is used in test and here
      * @param cons The consumer
      * @param timeout Timeout in milliseconds after which to give up
      */
