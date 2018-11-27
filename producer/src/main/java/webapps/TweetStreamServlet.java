@@ -23,7 +23,7 @@ import java.util.Random;
 public class TweetStreamServlet extends HttpServlet {
 
     PropertyManager pm = new PropertyManager();
-    StreamManager m = new StreamManager(pm.allProperties());
+    StreamManager m = StreamManager.getInstance(pm.allProperties());
 
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
