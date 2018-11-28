@@ -3,6 +3,9 @@ language: java
 jdk:
   - openjdk8
 
+services:
+  - docker
+
 before_install:
   - echo "$CONFIG_FILE" | base64 -d >> config.properties
   - mkdir certificates
@@ -19,6 +22,9 @@ matrix:
     python: "3.5"
     install: cd analyzer && pip3 install -r requirements.txt
     script: pytest
+  - name: "Test docker-build"
+    script: docker-compose build
+    
 
 notifications:
   slack:

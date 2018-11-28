@@ -1,0 +1,16 @@
+version: '2'
+services:
+  producer:
+    build: ./producer
+    image: producer
+    volumes:
+      - ./config.properties:/usr/local/config.properties
+      - ./certificates:/usr/local/certificates
+    ports:
+    - "8080:8080"
+  analyzer:
+    build: ./analyzer
+    image: analyzer
+    volumes:
+      - ./config.properties:/config.properties
+      - ./certificates:/certificates

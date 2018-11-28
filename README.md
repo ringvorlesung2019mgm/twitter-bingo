@@ -35,3 +35,15 @@ Producer+Webapp:
 ```
 cd producer && ./gradlew appRun
 ```
+
+## Docker
+You can also build and run the whole software-stack using docker and docker-compose.
+First you need to build the docker-images from the project sources:
+```
+docker-compose build
+```
+After this place certificates and config files like you would do when running normally. Then just run:
+```
+docker-compose up
+```
+This will start one producer/webserver and one analyzer. You can now visit the webapp on http://localhost:8080/producer
