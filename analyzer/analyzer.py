@@ -21,6 +21,11 @@ def read_config(file):
             key = key.strip()
             value = value.strip()
             config[key] = value
+
+    # Set some default values
+    if "security.protocol" not in config:
+        config["security.protocol"] = "PLAINTEXT"
+
     return config
 
 """
@@ -54,19 +59,24 @@ def wait_for_assignment(consumer,message=None):
 def main(input_topic_prefix,outout_topic_prefix,group_id=group_id,seek=False,stop_event=None,start_event=None,debug=False):
     conf = read_config(open("../config.properties"))
 
-    sslctx = create_sslcontext(conf["ssl.keystore.password"])
+    security_protocol = conf.get("security.protocol")
+
+    if security_protocol == "SSL":
+        sslctx = create_sslcontext(conf["ssl.keystore.password"])
+    else:
+        sslctx = None
 
     consumer = KafkaConsumer(
     bootstrap_servers=conf["bootstrap.servers"],
     group_id=group_id,
-    security_protocol="SSL",
+    security_protocol=security_protocol,
     ssl_context=sslctx,
     consumer_timeout_ms= 1000
     )
 
     producer = KafkaProducer(
     bootstrap_servers=conf["bootstrap.servers"],
-    security_protocol="SSL",
+    security_protocol=security_protocol,
     ssl_context=sslctx
     )
 

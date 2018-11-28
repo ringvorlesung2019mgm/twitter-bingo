@@ -11,6 +11,8 @@ twitter.token = *****************
 twitter.tokenSecret = *****************
 
 bootstrap.servers = yourkafkaserver:9092
+# The two lines below should only be there if your Kafka is using SSL. Otherwise DELETE THEM!!!
+security.protocoll = SSL
 ssl.keystore.password = thepasswordforyourcertificates
 ```
 

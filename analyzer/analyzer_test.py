@@ -2,6 +2,7 @@ from analyzer import *
 import socket
 import threading
 import json
+import pytest
 
 def test_read_config():
     teststring = """
@@ -16,6 +17,8 @@ def test_read_config():
 
 def test_sslcontext():
     conf = read_config(open("../config.properties"))
+    if conf.get("security.protocol") != "SSL":
+        pytest.skip("Cannot test SSL-connection because of non-SSL Broker")
     sslctx = create_sslcontext(conf["ssl.keystore.password"])
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.settimeout(10)
@@ -32,18 +35,24 @@ def test_analyzer():
     expected = json.dumps({"text": "My-test","rating":0.0,"isRated": True}).encode()
 
     conf = read_config(open("../config.properties"))
-    sslctx = create_sslcontext(conf["ssl.keystore.password"])
+
+    security_protocol = conf.get("security.protocol")
+
+    if security_protocol == "SSL":
+        sslctx = create_sslcontext(conf["ssl.keystore.password"])
+    else:
+        sslctx = None
 
     consumer = KafkaConsumer(
     bootstrap_servers=conf["bootstrap.servers"],
     group_id="analyzertest",
-    security_protocol="SSL",
+    security_protocol=security_protocol,
     ssl_context=sslctx
     )
 
     producer = KafkaProducer(
     bootstrap_servers=conf["bootstrap.servers"],
-    security_protocol="SSL",
+    security_protocol=security_protocol,
     ssl_context=sslctx
     )
 

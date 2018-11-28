@@ -51,6 +51,9 @@ public class PropertyManager {
                 p.put("ssl.key.password",p.get("ssl.keystore.password"));
             }
         }
+        if(!p.containsKey("security.protocol")){
+            p.put("security.protocol","PLAINTEXT");
+        }
     }
 
     public Properties allProperties(){
@@ -69,12 +72,12 @@ public class PropertyManager {
 
     public Properties consumerProperties() {
         Properties props = new Properties();
-        props.put("ssl.enabled.protocols", "TLSv1.1,TLSv1.2");
-        props.put("ssl.protocol", "TLSv1.2");
         props.put("group.id", "test123");
         appendDeserialiser(props);
-        appendClientKeystore(props);
         props.putAll(userSettings);
+        if (props.getProperty("security.protocol").equals("SSL")) {
+            appendSSL(props);
+        }
         return props;
     }
 
@@ -85,12 +88,18 @@ public class PropertyManager {
         props.put("batch.size", 16384);
         props.put("linger.ms", 1);
         props.put("buffer.memory", 33554432);
+        appendSerializer(props);
+        props.putAll(userSettings);
+        if (props.getProperty("security.protocol").equals("SSL")) {
+            appendSSL(props);
+        }
+        return props;
+    }
+
+    public void appendSSL(Properties props){
         props.put("ssl.enabled.protocols", "TLSv1.1,TLSv1.2");
         props.put("ssl.protocol", "TLSv1.2");
-        appendSerializer(props);
         appendClientKeystore(props);
-        props.putAll(userSettings);
-        return props;
     }
 
     private void appendSerializer(Properties props) {
