@@ -1,0 +1,85 @@
+h1 {
+	font-family: Arial;
+	text-align: center;
+}
+
+div {
+	font-family: Arial;
+}
+
+.center-block {
+	display: block;
+	margin-right: auto;
+	margin-left: auto;
+}
+
+.input-block {
+	margin-bottom: 30px
+}
+
+blockquote.twitter-tweet {
+	display: inline-block;
+	font-family: "Helvetica Neue", Roboto, "Segoe UI", Calibri, sans-serif;
+	font-size: 12px;
+	font-weight: bold;
+	line-height: 16px;
+	border-color: #eee #ddd #bbb;
+	border-radius: 5px;
+	border-style: solid;
+	border-width: 1px;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+	margin: 10px 5px;
+	padding: 16px 16px 16px;
+	max-width: 468px;
+	float: left;
+}
+
+blockquote.twitter-tweet p {
+	font-size: 16px;
+	font-weight: normal;
+	line-height: 20px;
+}
+
+blockquote.twitter-tweet a {
+	color: inherit;
+	font-weight: normal;
+	text-decoration: none;
+	outline: 0 none;
+}
+
+blockquote.twitter-tweet a:hover, blockquote.twitter-tweet a:focus {
+	text-decoration: underline;
+}
+
+.sentiment-number {
+	style ="float: right";
+	margin: 0px;
+	padding: 12px 16px 10px 16px;
+	margin: 10px 0px 0px 4px;
+	float: left;
+	background-color:green;
+    display: flex;
+    justify-content:center;
+    align-content:center;
+    flex-direction:column; 
+    border-radius:50%;
+    color:white;
+    font-weight: bold;
+}
+
+.tweet-window {
+	border-color: black;
+	border-width: 2px;
+	border-style: solid;
+	height: 400px;
+	width: 500px;
+	overflow-x: hidden;
+	overflow-y: scroll;
+	scrollbar-base-color: grey;
+	font-family: sans-serif;
+	padding: 10px;
+}
+
+
+	
+}

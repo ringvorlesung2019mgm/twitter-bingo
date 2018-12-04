@@ -8,9 +8,20 @@ public class StreamManager {
     HashMap<Query,TweetStream> streams = new HashMap<>();
     HashMap<Query,Integer> counts = new HashMap<>();
     Properties properties;
+    static StreamManager instance;
     
-    public StreamManager(Properties properties){
+    private StreamManager(Properties properties){
         this.properties = properties;
+    }
+
+    public static StreamManager getInstance(Properties properties){
+        if(instance == null) {
+            instance = new StreamManager(properties);
+        }else{
+            // TODO maybe refactor this to factory pattern, not sure if it makes sense
+            // instance.properties = properties;
+        }
+        return instance;
     }
 
     public synchronized void addStream(Query q){

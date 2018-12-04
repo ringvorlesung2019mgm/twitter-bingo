@@ -11,7 +11,7 @@ public class StreamManagerTest {
     public void testAddRemove(){
         PropertyManager pm = new PropertyManager();
         Properties p = pm.allProperties();
-        StreamManager m = new StreamManager(p);
+        StreamManager m = StreamManager.getInstance(p);
 
         Assert.assertEquals(0,m.activeQueries());
 
