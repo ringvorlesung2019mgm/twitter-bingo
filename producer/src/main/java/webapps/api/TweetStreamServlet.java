@@ -7,6 +7,7 @@ import org.apache.kafka.common.TopicPartition;
 import producer.*;
 import twitter4j.JSONException;
 import twitter4j.JSONObject;
+import twitter4j.User;
 
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -23,7 +24,7 @@ import java.util.Random;
 public class TweetStreamServlet extends HttpServlet {
 
     PropertyManager pm = new PropertyManager();
-    StreamManager m = StreamManager.getInstance(pm.allProperties());
+    UserManager userManager = UserManager.getInstance(pm.allProperties());
 
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
@@ -36,10 +37,10 @@ public class TweetStreamServlet extends HttpServlet {
         response.setHeader("Transfer-Encoding", "chunked");
 
         Query query = new producer.Query(hashtag);
-        String kafkaTopic = m.topicFromQuery(query);
+        String kafkaTopic = userManager.streamManager.topicFromQuery(query);
 
         // create stream from query
-        m.addStream(query);
+        userManager.addUser(id, query);
 
         // create demo consumer
         KafkaConsumer<String, String> cons = new KafkaConsumer<>(pm.consumerProperties());
@@ -48,7 +49,6 @@ public class TweetStreamServlet extends HttpServlet {
         // read from consumer and write to frontend
         // TODO make fancy
         while (!response.getWriter().checkError()) {
-
             waitForAssignments(cons, 10000);
             cons.seekToEnd(cons.assignment());
             ConsumerRecords<String, String> consumerRecords = cons.poll(Duration.ofSeconds(10L));
@@ -64,7 +64,6 @@ public class TweetStreamServlet extends HttpServlet {
                 }
                 response.getWriter().write(twingoTweet.toJSON() + "\r\n");
                 response.getWriter().flush();
-
             }
         }
     }
