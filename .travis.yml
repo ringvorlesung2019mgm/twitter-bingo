@@ -5,7 +5,6 @@ jdk:
 
 services:
   - docker
-  - mongodb
 
 before_install:
   - echo "$CONFIG_FILE" | base64 -d >> config.properties
@@ -21,7 +20,11 @@ matrix:
   - name: "Test python"
     language: python
     python: "3.5"
-    install: cd analyzer && pip3 install -r requirements.txt
+    install: 
+      - cd analyzer && pip3 install -r requirements.txt
+      - docker-compose build mongodb
+      - docker-compose up -d mongodb
+      - sleep 5
     script: pytest
   - name: "Test docker-build"
     script: docker-compose build
