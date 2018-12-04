@@ -6,6 +6,7 @@ from sentimentanalysis import *
 from convertcerts import pkcs12_to_pem
 import argparse
 import json
+from pymongo import MongoClient
 
 group_id = "analyzers" 
 
@@ -25,6 +26,10 @@ def read_config(file):
     # Set some default values
     if "security.protocol" not in config:
         config["security.protocol"] = "PLAINTEXT"
+
+    if "mongodb" not in config:
+        config["mongodb"] = "mongodb://localhost:27017/"
+
 
     return config
 
@@ -56,7 +61,7 @@ def wait_for_assignment(consumer,message=None):
             print(message)
         time.sleep(1)
 
-def main(input_topic_prefix,outout_topic_prefix,group_id=group_id,seek=False,stop_event=None,start_event=None,debug=False):
+def main(input_topic,db,group_id=group_id,seek=False,stop_event=None,start_event=None,debug=False):
     conf = read_config(open("../config.properties"))
 
     security_protocol = conf.get("security.protocol")
@@ -74,14 +79,14 @@ def main(input_topic_prefix,outout_topic_prefix,group_id=group_id,seek=False,sto
     consumer_timeout_ms= 1000
     )
 
-    producer = KafkaProducer(
-    bootstrap_servers=conf["bootstrap.servers"],
-    security_protocol=security_protocol,
-    ssl_context=sslctx
-    )
 
-    pattern = "^"+input_topic_prefix+".*"
-    consumer.subscribe(pattern=pattern)
+    db_name, collection_name = db.split("/")
+
+    dbclient = MongoClient(conf["mongodb"])
+    tweetcollection = dbclient[db_name][collection_name]
+
+
+    consumer.subscribe(topics=(input_topic,))
     wait_for_assignment(consumer,"Analyzer waiting for assignments")
 
     if seek == "begin":
@@ -104,10 +109,9 @@ def main(input_topic_prefix,outout_topic_prefix,group_id=group_id,seek=False,sto
             sentiment = get_tweet_sentiment(tweet["text"])
             tweet["rating"]=sentiment
             tweet["isRated"]=True
-            newtopic = msg.topic.replace(input_topic_prefix,outout_topic_prefix)
-            producer.send(newtopic,value=json.dumps(tweet).encode("UTF-8"))
+            tweetcollection.insert_one(tweet)
             if debug:
-                print ("From:",msg.topic,"To:",newtopic, " : ",tweet)
+                print ("From:",msg.topic," : ",tweet)
             if stop_event:
                 if stop_event.isSet():
                     break
@@ -117,8 +121,8 @@ def main(input_topic_prefix,outout_topic_prefix,group_id=group_id,seek=False,sto
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Analyze messages from kafka')
-    parser.add_argument('--input_prefix', type=str, help='The prefix all monitored topics start with', default="UNI_tweets_")
-    parser.add_argument('--output_prefix', type=str, help='The string to replace the input-prefix with to obtain the output topic for a tweet', default="UNI_analyzed-tweets_")
+    parser.add_argument('--input_topic', type=str, help='The kafka topic to load raw tweets from', default="tweets")
+    parser.add_argument('--db', type=str, help='Name of the database and collection in which to store analyzed tweets', default="twitter/tweets")
     parser.add_argument('--group_id', type=str, help='The if of the consumer-group this consumer belongs to', default=group_id)
     parser.add_argument('--seek', type=str, help='Seek to "begin", "end" or "none" when starting up.', default="none")
     parser.add_argument('--debug', type=bool, help='Print debug infos (like analyzed messages)', default=False)
@@ -127,8 +131,8 @@ if __name__ == '__main__':
     print(args)
 
     print("Starting analyser...")
-    main(args.input_prefix,
-         args.output_prefix,
+    main(args.input_topic,
+         args.db,
          group_id=args.group_id,
          seek=args.seek,
          debug=args.debug)

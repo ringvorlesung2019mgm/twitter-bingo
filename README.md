@@ -10,13 +10,23 @@ twitter.consumerSecret =  ******************
 twitter.token = *****************
 twitter.tokenSecret = *****************
 
-bootstrap.servers = yourkafkaserver:9092
+mongodb = mongodb://localhost:27017/
+
+bootstrap.servers = localhost:9092
 # The two lines below should only be there if your Kafka is using SSL. Otherwise DELETE THEM!!!
 security.protocoll = SSL
 ssl.keystore.password = thepasswordforyourcertificates
 ```
 
 You will also need to create a directory named certificates containing a file kafka.client.keystore.jks (with the certificate+key to connect to kafka) and kafka.client.truststore.jks (with the CA-certifikates needed for the server). Both files need to be in the PKCS12-Format. Python can't use pkcs12-certificates and will therefore automatically create a copy of the certificates as PEM-files in the same directory.
+
+## Required Services
+To use this software you will need to hav a running kafka-server and a running mongodb-server. You can get both using the docker-compose file in this repo:
+
+```
+sudo docker-comppose build
+sudo docker-compose up kafka mongodb
+```
 
 ## Running tests
 

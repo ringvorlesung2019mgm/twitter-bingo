@@ -33,6 +33,7 @@ services:
     environment:
       KAFKA_ADVERTISED_HOST_NAME: 127.0.0.1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_CREATE_TOPICS: "tweets:1:1,test-tweets:1:1"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
   mongodb:

@@ -29,10 +29,8 @@ def test_sslcontext():
     wrappedSocket.close()
 
 def test_analyzer():
-    inp = "raw-testtopic"
-    outp = "analyzed-testtopic"
+    inp = "test-tweets"
     testvalue = json.dumps({"text": "My-test"}).encode()
-    expected = json.dumps({"text": "My-test","rating":0.0,"isRated": True}).encode()
 
     conf = read_config(open("../config.properties"))
 
@@ -43,12 +41,6 @@ def test_analyzer():
     else:
         sslctx = None
 
-    consumer = KafkaConsumer(
-    bootstrap_servers=conf["bootstrap.servers"],
-    group_id="analyzertest",
-    security_protocol=security_protocol,
-    ssl_context=sslctx
-    )
 
     producer = KafkaProducer(
     bootstrap_servers=conf["bootstrap.servers"],
@@ -56,38 +48,39 @@ def test_analyzer():
     ssl_context=sslctx
     )
 
-    consumer.subscribe(pattern="^"+outp+".*")
+    dbclient = MongoClient(conf["mongodb"])
+    db = dbclient.twitter
+    collection = db["test-tweets"]
 
-    # Push messages to all needed topics to create them if needed
-    producer.send(outp,"Create topic".encode())
-    producer.send(inp,"Create topic".encode())
-    producer.flush()
-    time.sleep(1)
-
-    wait_for_assignment(consumer,"Test waiting for assignment")
-    consumer.seek_to_end()
-    consumer.poll(0)
 
     stopEvent = threading.Event()
     startEvent = threading.Event()
 
-    analyzerThread = threading.Thread(target=main,args=(inp,outp,"analyzers","end",stopEvent,startEvent,True))
+    analyzerThread = threading.Thread(target=main,args=(inp,"twitter/test-tweets","analyzers","end",stopEvent,startEvent,True))
+    analyzerThread.daemon = True
     analyzerThread.start()
 
     startEvent.wait()
-    producer.send(inp+"-1",testvalue)
-    producer.send(inp+"-2",testvalue)
+
+    changestream = collection.watch()
+
+    producer.send(inp,testvalue)
     producer.flush()
 
-    resplist=[]
-    resp = consumer.poll(20000)
-    resplist.extend(list(resp.values())[0])
+    results = []
+    def waitfor():
+        results.append(changestream.next()["fullDocument"])
 
-    # if poll returned only one result, poll again
-    if len(resplist) < 2:
-        resp = consumer.poll(20000)
-        resplist.extend(list(resp.values())[0])
+    waitingThread = threading.Thread(target=waitfor)
+    waitingThread.daemon = True
+    waitingThread.start()
+
+    for _ in range(1,10):
+        if len(results) > 0:
+            break
+        time.sleep(1)
 
     stopEvent.set()
-    assert resplist[0].value == expected
-    assert resplist[1].value == expected
+
+    assert results[0]["text"] == "My-test"
+    assert results[0]["rating"] == 0.0

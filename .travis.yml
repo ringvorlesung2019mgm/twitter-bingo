@@ -5,6 +5,7 @@ jdk:
 
 services:
   - docker
+  - mongodb
 
 before_install:
   - echo "$CONFIG_FILE" | base64 -d >> config.properties

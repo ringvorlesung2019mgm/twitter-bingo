@@ -3,3 +3,4 @@ textblob_de
 kafka-python
 pyopenssl
 pytest
+pymongo
