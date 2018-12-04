@@ -1,0 +1,2 @@
+# Why does this directory exist?
+Mongodb's change stream feature only works if mongodb is running as replicaset. To form a replicaset (even on a single node) you need to run "rs.initiate()" on one of the nodes after startup. This image extends the standard mongodb-image to automatically run this command on the first startup. This is (probably?) not a good idea on real-world multi-node replica sets, but for our purposes it's good enough.

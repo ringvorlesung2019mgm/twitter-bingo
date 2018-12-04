@@ -3,6 +3,9 @@ services:
   producer:
     build: ./producer
     image: producer
+    depends_on:
+      - kafka
+      - mongodb
     volumes:
       - ./config.properties:/usr/local/config.properties
       - ./certificates:/usr/local/certificates
@@ -11,6 +14,9 @@ services:
   analyzer:
     build: ./analyzer
     image: analyzer
+    depends_on:
+      - kafka
+      - mongodb
     volumes:
       - ./config.properties:/config.properties
       - ./certificates:/certificates
@@ -29,3 +35,7 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+  mongodb:
+    build: ./mongodb
+    ports:
+      - "27017:27017" 
