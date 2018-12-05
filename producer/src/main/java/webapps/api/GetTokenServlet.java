@@ -12,7 +12,8 @@ import java.io.IOException;
 @WebServlet("/api/GetToken")
 public class GetTokenServlet extends HttpServlet{
 
-    SessionManager sessionManager = SessionManager.getDefaultInstance();
+    PropertyManager pm = new PropertyManager();
+    SessionManager sessionManager = SessionManager.getInstance(pm.allProperties(), pm.sessionManagerProperties());
 
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.getWriter().write(sessionManager.generateSession().toJSON());

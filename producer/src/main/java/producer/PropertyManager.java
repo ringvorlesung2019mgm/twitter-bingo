@@ -98,10 +98,21 @@ public class PropertyManager {
     public Properties sessionManagerProperties() {
         Properties props = new Properties();
         props.put("removeInactive.initalDelay", "0");
-        props.put("removeInactive.period", "5");
-        props.put("removeInactive.TimeUnit", TimeUnit.SECONDS);
-        props.put("defaultTimeOut.amount", 5);
-        props.put("defaultTimeOut.CalendarUnit", Calendar.SECOND);
+        props.put("removeInactive.period", "15");
+        props.put("removeInactive.TimeUnit", TimeUnit.SECONDS.toString());
+        props.put("def.amount", "5");
+        props.put("def.CalendarUnit", Integer.toString(Calendar.MINUTE));
+        props.putAll(userSettings);
+        return props;
+    }
+
+    public Properties JUNITsessionManagerProperties(){
+        Properties props = new Properties();
+        props.put("removeInactive.initalDelay", "0");
+        props.put("removeInactive.period", "1");
+        props.put("removeInactive.TimeUnit", TimeUnit.SECONDS.toString());
+        props.put("def.amount", "1");
+        props.put("def.CalendarUnit", Integer.toString(Calendar.MINUTE));
         props.putAll(userSettings);
         return props;
     }

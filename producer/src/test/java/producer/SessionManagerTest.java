@@ -16,8 +16,7 @@ public class SessionManagerTest {
     @Before
     public void before(){
         PropertyManager propertyManager = new PropertyManager();
-        Properties properties = propertyManager.allProperties();
-         sessionManager = SessionManager.getInstance(properties);
+         sessionManager = SessionManager.getInstance(propertyManager.allProperties(), propertyManager.JUNITsessionManagerProperties());
     }
 
     @After
@@ -42,7 +41,7 @@ public class SessionManagerTest {
 
         assert sessionManager.sessions.containsKey(newSession.getSessionId());
 
-        Thread.sleep(10000);
+        Thread.sleep(90 * 1000);
 
         assert !sessionManager.sessions.containsKey(newSession.getSessionId());
     }

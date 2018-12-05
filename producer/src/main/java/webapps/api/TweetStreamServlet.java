@@ -20,7 +20,7 @@ import java.util.UUID;
 public class TweetStreamServlet extends HttpServlet {
 
     PropertyManager pm = new PropertyManager();
-    SessionManager sessionManager = SessionManager.getDefaultInstance();
+    SessionManager sessionManager = SessionManager.getInstance(pm.allProperties(), pm.sessionManagerProperties());
 
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
 

@@ -11,7 +11,7 @@ public class SessionManager {
 
     HashMap<UUID, TwingoSession> sessions;
     public StreamManager streamManager;
-    Properties props;
+    Properties sessionManagerProperties;
 
 
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
@@ -20,7 +20,7 @@ public class SessionManager {
             for (Map.Entry<UUID, TwingoSession> user : sessions.entrySet()) {
                 System.out.println(user.getValue().getTimeToRemove());
                 if (user.getValue().getTimeToRemove().before(new Date())) {
-                    if(user.getValue().getQuery() != null){
+                    if (user.getValue().getQuery() != null) {
                         streamManager.removeStream(user.getValue().getQuery());
                     }
                     sessions.remove(user.getKey());
@@ -32,22 +32,20 @@ public class SessionManager {
         }
     };
 
-    private SessionManager(StreamManager streamManager) {
+    private SessionManager(Properties allProperties, Properties sessionManagerProperties) {
         sessions = new HashMap<>();
-        scheduler.scheduleAtFixedRate(removeInactiveStreams, 0, 10, TimeUnit.SECONDS);
-        this.streamManager = streamManager;
+        this.sessionManagerProperties = sessionManagerProperties;
+        scheduler.scheduleAtFixedRate(removeInactiveStreams,
+                Integer.parseInt(this.sessionManagerProperties.getProperty("removeInactive.initalDelay")),
+                Integer.parseInt(this.sessionManagerProperties.getProperty("removeInactive.period")),
+                TimeUnit.valueOf(this.sessionManagerProperties.getProperty("removeInactive.TimeUnit")));
+        this.streamManager = StreamManager.getInstance(allProperties);
+
     }
 
-    public static SessionManager getInstance(Properties properties) {
+    public static SessionManager getInstance(Properties allProperties, Properties sessionManagerProperties) {
         if (SessionManager.instance == null) {
-            SessionManager.instance = new SessionManager(StreamManager.getInstance(properties));
-        }
-        return SessionManager.instance;
-    }
-
-    public static SessionManager getDefaultInstance() {
-        if (SessionManager.instance == null) {
-            SessionManager.instance = new SessionManager(StreamManager.getDefaultInstance());
+            SessionManager.instance = new SessionManager(allProperties, sessionManagerProperties);
         }
         return SessionManager.instance;
     }
@@ -57,10 +55,14 @@ public class SessionManager {
         SessionManager.instance = null;
     }
 
-    private Date getDefaultTimeOut(){
+    private Date getDefaultTimeOut() {
+        String calUni_String = this.sessionManagerProperties.getProperty("def.CalendarUnit");
+        String calAmount_String = this.sessionManagerProperties.getProperty("def.amount");
+        int calUni = Integer.parseInt(calUni_String);
+        int calAmount = Integer.parseInt(calAmount_String);
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
-        calendar.add(Calendar.MINUTE, 1);
+        calendar.add(calUni, calAmount);
         return calendar.getTime();
     }
 
@@ -127,7 +129,7 @@ public class SessionManager {
     public synchronized void removeSession(UUID sessionId) {
         if (sessions.containsKey(sessionId)) {
             TwingoSession session = sessions.get(sessionId);
-            if(session.getQuery() != null) {
+            if (session.getQuery() != null) {
                 streamManager.removeStream(sessions.get(sessionId).getQuery());
             }
             sessions.remove(sessionId);
@@ -141,7 +143,7 @@ public class SessionManager {
         }
     }
 
-    public synchronized  void scheduleRemoveSessionDefaultTimeout(UUID sessionId){
+    public synchronized void scheduleRemoveSessionDefaultTimeout(UUID sessionId) {
         scheduleRemoveSession(sessionId, getDefaultTimeOut());
     }
 
