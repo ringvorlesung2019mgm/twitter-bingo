@@ -3,11 +3,7 @@ package webapps.api;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.common.TopicPartition;
 import producer.*;
-import twitter4j.JSONException;
-import twitter4j.JSONObject;
-import twitter4j.User;
 
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -16,31 +12,42 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Collections;
-import java.util.Properties;
 import java.util.Random;
+import java.util.UUID;
 
 
 @WebServlet("/api/TweetStream")
 public class TweetStreamServlet extends HttpServlet {
 
     PropertyManager pm = new PropertyManager();
-    UserManager userManager = UserManager.getInstance(pm.allProperties());
+    SessionManager sessionManager = SessionManager.getDefaultInstance();
 
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
-        // get parameters from request
-        String id = request.getSession().getId();
-        String hashtag = request.getParameter("hashtag");
+        // read request data
+        StringBuilder sb = new StringBuilder();
+        String s;
+        while ((s = request.getReader().readLine()) != null) {
+            sb.append(s);
+        }
+        TwingoStreamRequest data = TwingoStreamRequest.fromJson(sb.toString());
+        UUID sessionId = data.sessionId;
+        String hashtag = data.hashtag;
 
         // set headers for chunked transfer encoding stream
         response.setHeader("Access-Control-Allow-Origin", "*");
         response.setHeader("Transfer-Encoding", "chunked");
 
+
         Query query = new producer.Query(hashtag);
-        String kafkaTopic = userManager.streamManager.topicFromQuery(query);
+        String kafkaTopic = sessionManager.streamManager.topicFromQuery(query);
 
         // create stream from query
-        userManager.addUser(id, query);
+        try {
+            sessionManager.selectQuery(sessionId, query);
+        } catch (UnregisteredTwingoUserException e) {
+            e.printStackTrace();
+        }
 
         // create demo consumer
         KafkaConsumer<String, String> cons = new KafkaConsumer<>(pm.consumerProperties());

@@ -26,6 +26,15 @@ public class StreamManager {
         return instance;
     }
 
+    // HACKY SOLUTION, definitly refactor to factory pattern
+    public static StreamManager getDefaultInstance(){
+        PropertyManager pm = new PropertyManager();
+        if(instance == null){
+            instance = new StreamManager(pm.allProperties());
+        }
+        return instance;
+    }
+
     public static void destroyInstance(){
         StreamManager.instance = null;
     }
