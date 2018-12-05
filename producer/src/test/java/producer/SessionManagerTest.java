@@ -25,7 +25,6 @@ public class SessionManagerTest {
         SessionManager.destroyInstance();
     }
 
-
     @Test
     public void testGenerateSession(){
         TwingoSession newSession = sessionManager.generateSession();
@@ -82,7 +81,7 @@ public class SessionManagerTest {
     }
 
     @Test
-    public void removeUserWithQueryNotUsed() throws UnregisteredTwingoUserException {
+    public void testRemoveUserWithQueryNotUsed() throws UnregisteredTwingoUserException {
         TwingoSession session = sessionManager.generateSession();
         Query query  = new Query("love");
 

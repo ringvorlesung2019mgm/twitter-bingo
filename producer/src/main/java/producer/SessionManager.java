@@ -11,11 +11,11 @@ public class SessionManager {
 
     HashMap<UUID, TwingoSession> sessions;
     public StreamManager streamManager;
+    Properties props;
 
 
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private final Runnable removeInactiveStreams = () -> {
-        System.out.println("I just ran");
         try {
             for (Map.Entry<UUID, TwingoSession> user : sessions.entrySet()) {
                 System.out.println(user.getValue().getTimeToRemove());
@@ -57,6 +57,13 @@ public class SessionManager {
         SessionManager.instance = null;
     }
 
+    private Date getDefaultTimeOut(){
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.add(Calendar.MINUTE, 1);
+        return calendar.getTime();
+    }
+
     /**
      * Generates  a user with the given id/query and the default timeout specified in config
      *
@@ -64,10 +71,7 @@ public class SessionManager {
      */
     public synchronized TwingoSession generateSession() {
         // TODO move default value to config
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(new Date());
-        calendar.add(Calendar.SECOND, 5);
-        return generateSession(calendar.getTime());
+        return generateSession(getDefaultTimeOut());
     }
 
     /**
@@ -93,11 +97,7 @@ public class SessionManager {
      * @param query
      */
     public synchronized void selectQuery(UUID userId, Query query) throws UnregisteredTwingoUserException {
-        // TODO move default value to config
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(new Date());
-        calendar.add(Calendar.SECOND, 5);
-        selectQuery(userId, query, calendar.getTime());
+        selectQuery(userId, query, getDefaultTimeOut());
     }
 
     /**
@@ -139,6 +139,10 @@ public class SessionManager {
         if (sessions.containsKey(sessionId)) {
             sessions.get(sessionId).setTimeToRemove(timeToRemove);
         }
+    }
+
+    public synchronized  void scheduleRemoveSessionDefaultTimeout(UUID sessionId){
+        scheduleRemoveSession(sessionId, getDefaultTimeOut());
     }
 
 

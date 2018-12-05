@@ -27,22 +27,22 @@ public class StreamManager {
     }
 
     // HACKY SOLUTION, definitly refactor to factory pattern
-    public static StreamManager getDefaultInstance(){
+    public static StreamManager getDefaultInstance() {
         PropertyManager pm = new PropertyManager();
-        if(instance == null){
+        if (instance == null) {
             instance = new StreamManager(pm.allProperties());
         }
         return instance;
     }
 
-    public static void destroyInstance(){
+    public static void destroyInstance() {
         StreamManager.instance = null;
     }
 
     public synchronized void addStream(Query q) {
         // if this user has already registered a query
         if (!streams.containsKey(q)) {
-            KafkaAdapter adap = new KafkaAdapter(properties, topicFromQuery(q));
+            KafkaAdapter adap = new KafkaAdapter(properties, getRawTopicFromQuery(q));
             TweetStream stream = new TweetStream(properties.getProperty("twitter.consumer"), properties.getProperty("twitter.consumerSecret"), properties.getProperty("twitter.token"), properties.getProperty("twitter.tokenSecret"));
             stream.stream(q, adap);
             streams.put(q, stream);
@@ -71,7 +71,11 @@ public class StreamManager {
         return streams.size();
     }
 
-    public String topicFromQuery(Query q) {
-        return "uni_" + q.toString();
+    public String getRawTopicFromQuery(Query q) {
+        return "UNI_tweets_" + q.toString();
+    }
+
+    public String getAnalysedTopicFromQuery(Query q) {
+        return "UNI_analyzed-tweets_" + q.toString();
     }
 }

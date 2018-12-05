@@ -40,7 +40,8 @@ public class TweetStreamServlet extends HttpServlet {
 
 
         Query query = new producer.Query(hashtag);
-        String kafkaTopic = sessionManager.streamManager.topicFromQuery(query);
+        String kafkaRawTopic = sessionManager.streamManager.getRawTopicFromQuery(query);
+        String kafkaAnalysedTopic = sessionManager.streamManager.getAnalysedTopicFromQuery(query);
 
         // create stream from query
         try {
@@ -51,7 +52,7 @@ public class TweetStreamServlet extends HttpServlet {
 
         // create demo consumer
         KafkaConsumer<String, String> cons = new KafkaConsumer<>(pm.consumerProperties());
-        cons.subscribe(Collections.singletonList(kafkaTopic));
+        cons.subscribe(Collections.singletonList(kafkaAnalysedTopic));
 
         // read from consumer and write to frontend
         // TODO make fancy
@@ -60,16 +61,10 @@ public class TweetStreamServlet extends HttpServlet {
             cons.seekToEnd(cons.assignment());
             ConsumerRecords<String, String> consumerRecords = cons.poll(Duration.ofSeconds(10L));
 
-            for (ConsumerRecord record : consumerRecords.records(kafkaTopic)) {
-                TwingoTweet twingoTweet = TwingoTweet.fromJson(record.value().toString());
-                // generate random analyser rating
-                try {
-                    Random random = new Random();
-                    twingoTweet.setRating((random.nextDouble() - 0.5) * 50);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                response.getWriter().write(twingoTweet.toJSON() + "\r\n");
+            // TODO do something less stupid
+            sessionManager.scheduleRemoveSessionDefaultTimeout(sessionId);
+            for (ConsumerRecord record : consumerRecords.records(kafkaAnalysedTopic)) {
+                response.getWriter().write(record.value().toString() + "\r\n");
                 response.getWriter().flush();
             }
         }
