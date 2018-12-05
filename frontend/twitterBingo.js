@@ -16,7 +16,7 @@ var myApp = angular.module('myApp', ['ngtweet']);
 
 	var last_index = 0;
         var xhr = new XMLHttpRequest()
-        xhr.open("POST", "http://localhost:8080/producer/TweetStream", true)
+        xhr.open("POST", "http://localhost:8080/producer/api/TweetStream", true)
 	xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
 	xhr.send("id=" + id + "&hashtag=" + hashtag);
         xhr.onprogress = function () {

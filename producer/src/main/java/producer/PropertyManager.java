@@ -8,7 +8,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Calendar;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 /** Handles all configuration-related stuff.
  *
@@ -100,6 +102,28 @@ public class PropertyManager {
         props.put("ssl.enabled.protocols", "TLSv1.1,TLSv1.2");
         props.put("ssl.protocol", "TLSv1.2");
         appendClientKeystore(props);
+    }
+
+    public Properties sessionManagerProperties() {
+        Properties props = new Properties();
+        props.put("removeInactive.initalDelay", "0");
+        props.put("removeInactive.period", "15");
+        props.put("removeInactive.TimeUnit", TimeUnit.SECONDS.toString());
+        props.put("def.amount", "5");
+        props.put("def.CalendarUnit", Integer.toString(Calendar.MINUTE));
+        props.putAll(userSettings);
+        return props;
+    }
+
+    public Properties JUNITsessionManagerProperties(){
+        Properties props = new Properties();
+        props.put("removeInactive.initalDelay", "0");
+        props.put("removeInactive.period", "1");
+        props.put("removeInactive.TimeUnit", TimeUnit.SECONDS.toString());
+        props.put("def.amount", "1");
+        props.put("def.CalendarUnit", Integer.toString(Calendar.MINUTE));
+        props.putAll(userSettings);
+        return props;
     }
 
     private void appendSerializer(Properties props) {

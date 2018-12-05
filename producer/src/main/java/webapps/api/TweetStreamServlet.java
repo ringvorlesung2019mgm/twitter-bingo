@@ -3,10 +3,7 @@ package webapps.api;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.common.TopicPartition;
 import producer.*;
-import twitter4j.JSONException;
-import twitter4j.JSONObject;
 
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -15,56 +12,60 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Collections;
-import java.util.Properties;
 import java.util.Random;
+import java.util.UUID;
 
 
 @WebServlet("/api/TweetStream")
 public class TweetStreamServlet extends HttpServlet {
 
     PropertyManager pm = new PropertyManager();
-    StreamManager m = StreamManager.getInstance(pm.allProperties());
+    SessionManager sessionManager = SessionManager.getInstance(pm.allProperties(), pm.sessionManagerProperties());
 
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
-        // get parameters from request
-        String id = request.getSession().getId();
-        String hashtag = request.getParameter("hashtag");
+        // read request data
+        StringBuilder sb = new StringBuilder();
+        String s;
+        while ((s = request.getReader().readLine()) != null) {
+            sb.append(s);
+        }
+        TwingoStreamRequest data = TwingoStreamRequest.fromJson(sb.toString());
+        UUID sessionId = data.sessionId;
+        String hashtag = data.hashtag;
 
         // set headers for chunked transfer encoding stream
         response.setHeader("Access-Control-Allow-Origin", "*");
         response.setHeader("Transfer-Encoding", "chunked");
 
+
         Query query = new producer.Query(hashtag);
-        String kafkaTopic = m.topicFromQuery(query);
+        String kafkaRawTopic = sessionManager.streamManager.getRawTopicFromQuery(query);
+        String kafkaAnalysedTopic = sessionManager.streamManager.getAnalysedTopicFromQuery(query);
 
         // create stream from query
-        m.addStream(query);
+        try {
+            sessionManager.selectQuery(sessionId, query);
+        } catch (UnregisteredTwingoUserException e) {
+            e.printStackTrace();
+        }
 
         // create demo consumer
         KafkaConsumer<String, String> cons = new KafkaConsumer<>(pm.consumerProperties());
-        cons.subscribe(Collections.singletonList(kafkaTopic));
+        cons.subscribe(Collections.singletonList(kafkaAnalysedTopic));
 
         // read from consumer and write to frontend
         // TODO make fancy
         while (!response.getWriter().checkError()) {
-
             waitForAssignments(cons, 10000);
             cons.seekToEnd(cons.assignment());
             ConsumerRecords<String, String> consumerRecords = cons.poll(Duration.ofSeconds(10L));
 
-            for (ConsumerRecord record : consumerRecords.records(kafkaTopic)) {
-                TwingoTweet twingoTweet = TwingoTweet.fromJson(record.value().toString());
-                // generate random analyser rating
-                try {
-                    Random random = new Random();
-                    twingoTweet.setRating((random.nextDouble() - 0.5) * 50);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                response.getWriter().write(twingoTweet.toJSON() + "\r\n");
+            // TODO do something less stupid
+            sessionManager.scheduleRemoveSessionDefaultTimeout(sessionId);
+            for (ConsumerRecord record : consumerRecords.records(kafkaAnalysedTopic)) {
+                response.getWriter().write(record.value().toString() + "\r\n");
                 response.getWriter().flush();
-
             }
         }
     }
