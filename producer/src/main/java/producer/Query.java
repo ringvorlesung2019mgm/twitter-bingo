@@ -51,7 +51,7 @@ public class Query {
     @Override
     public boolean equals(Object o){
         if(o instanceof Query){
-            if(((Query)o).hashtag == hashtag){
+            if(((Query)o).hashtag.equals(hashtag)){
                 return true;
             }
         }

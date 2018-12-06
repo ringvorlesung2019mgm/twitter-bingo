@@ -18,10 +18,15 @@ public class StreamManagerTest {
         Query q1 = new Query("love");
         Query q2 = new Query("hate");
 
+
+        // Create string using constructor to work arount java's string-pooling
+        Query otherq1 = new Query(new String("love"));
+
+
         m.addStream(q1);
         Assert.assertEquals(1,m.activeQueries());
 
-        m.addStream(q1);
+        m.addStream(otherq1);
         Assert.assertEquals(1,m.activeQueries());
 
         m.addStream(q2);
