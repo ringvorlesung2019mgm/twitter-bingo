@@ -28,7 +28,10 @@ def read_config(file):
         config["security.protocol"] = "PLAINTEXT"
 
     if "mongodb" not in config:
-        config["mongodb"] = "mongodb://localhost:27017/"
+        config["mongodb"] = "mongodb:27017"
+
+    if "bootstrap.servers" not in config:
+        config["bootstrap.servers"] = "kafka:9092"
 
 
     return config

@@ -56,6 +56,12 @@ public class PropertyManager {
         if(!p.containsKey("security.protocol")){
             p.put("security.protocol","PLAINTEXT");
         }
+        if(!p.containsKey("mongodb")){
+            p.put("mongodb",p.get("mongodb:27017"));
+        }
+        if(!p.containsKey("bootstrap.servers")){
+            p.put("bootstrap.servers",p.get("kafka:9092"));
+        }
     }
 
     public Properties allProperties(){
