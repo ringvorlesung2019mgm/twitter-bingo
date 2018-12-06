@@ -4,8 +4,7 @@ services:
     build: ./producer
     image: producer
     depends_on:
-      - kafka
-      - mongodb
+      - start_dependencies
     volumes:
       - ./config.properties:/usr/local/config.properties
       - ./certificates:/usr/local/certificates
@@ -15,8 +14,7 @@ services:
     build: ./analyzer
     image: analyzer
     depends_on:
-      - kafka
-      - mongodb
+      - start_dependencies
     volumes:
       - ./config.properties:/config.properties
       - ./certificates:/certificates
@@ -31,7 +29,7 @@ services:
     ports:
       - "9092:9092"
     environment:
-      KAFKA_ADVERTISED_HOST_NAME: 127.0.0.1
+      KAFKA_ADVERTISED_HOST_NAME: kafka
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_CREATE_TOPICS: "tweets:1:1,test-tweets:1:1"
     volumes:
@@ -40,3 +38,9 @@ services:
     build: ./mongodb
     ports:
       - "27017:27017" 
+  start_dependencies:
+    image: dadarek/wait-for-dependencies
+    depends_on:
+      - kafka
+      - mongodb
+    command: kafka:9092 mongodb:27017

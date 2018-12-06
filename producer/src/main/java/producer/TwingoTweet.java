@@ -1,9 +1,12 @@
 package producer;
 
 import com.google.gson.Gson;
+import twitter4j.HashtagEntity;
 import twitter4j.Status;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class TwingoTweet {
 
@@ -16,9 +19,10 @@ public class TwingoTweet {
     private double geoLon;
     private boolean isRated;
     private double rating;
+    private List<String> hashtags;
 
 
-    public TwingoTweet(long id, String text, String userName, Date createdAt, boolean hasGeo, double geoLat, double geoLon, boolean isRated, double rating) {
+    public TwingoTweet(long id, String text, String userName, Date createdAt, boolean hasGeo, double geoLat, double geoLon, boolean isRated, double rating, List<String> hashtags) {
         this.id = id;
         this.text = text;
         this.userName = userName;
@@ -28,6 +32,7 @@ public class TwingoTweet {
         this.geoLon = geoLon;
         this.isRated = isRated;
         this.rating = rating;
+        this.hashtags = hashtags;
     }
 
     /**
@@ -37,10 +42,14 @@ public class TwingoTweet {
      * @return
      */
     public static TwingoTweet fromStatus(Status status) {
+        List<String> hashtags = new ArrayList<String>();
+        for(HashtagEntity ht : status.getHashtagEntities()){
+            hashtags.add(ht.getText().toLowerCase());
+        }
         if (status.getGeoLocation() != null) {
-            return new TwingoTweet(status.getId(), status.getText(), status.getUser().getName(), status.getCreatedAt(), true, status.getGeoLocation().getLatitude(), status.getGeoLocation().getLongitude(), false, 0);
+            return new TwingoTweet(status.getId(), status.getText(), status.getUser().getName(), status.getCreatedAt(), true, status.getGeoLocation().getLatitude(), status.getGeoLocation().getLongitude(), false, 0,hashtags);
         } else {
-            return new TwingoTweet(status.getId(), status.getText(), status.getUser().getName(), status.getCreatedAt(), false, 0, 0, false, 0);
+            return new TwingoTweet(status.getId(), status.getText(), status.getUser().getName(), status.getCreatedAt(), false, 0, 0, false, 0,hashtags);
         }
     }
 

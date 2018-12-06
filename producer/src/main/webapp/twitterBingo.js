@@ -40,10 +40,14 @@ function openTweetStreamConnection(sessionId, hashtag){
 	    if (last_index == curr_index) return;
 	    var s = xhr.responseText.substring(last_index, curr_index);
 	    last_index = curr_index;
-	    s = s.replace(/\r\n/gm,"");
-	    s = JSON.parse(s)
-	    $("#content").append("<blockquote class=\"twitter-tweet\"><p dir=\"ltr\">" + s.text + "</p>" + s.rating + "</blockquote>")
-	    console.log("POST /api/TweetStream Tweet received");
+	    ms = s.split("\r\n");
+	    for(i = 0;i<ms.length;i++){
+	        if (ms[i].length > 0){
+	            s = JSON.parse(ms[i])
+	            $("#content").append("<blockquote class=\"twitter-tweet\"><p dir=\"ltr\">" + s.text + "</p>" + s.rating + "</blockquote>")
+	            console.log("POST /api/TweetStream Tweet received");
+	        }
+	    }
 	    // console.log(s)
 	}
 }

@@ -1,8 +1,7 @@
 package webapps.api;
 
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.bson.Document;
 import producer.*;
 
 import javax.servlet.annotation.WebServlet;
@@ -11,8 +10,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.Duration;
-import java.util.Collections;
-import java.util.Random;
 import java.util.UUID;
 
 
@@ -40,33 +37,23 @@ public class TweetStreamServlet extends HttpServlet {
 
 
         Query query = new producer.Query(hashtag);
-        String kafkaRawTopic = sessionManager.streamManager.getRawTopicFromQuery(query);
-        String kafkaAnalysedTopic = sessionManager.streamManager.getAnalysedTopicFromQuery(query);
 
-        // create stream from query
+        MongoAdapter mad = new MongoAdapter(pm.allProperties().getProperty("mongodb"));
+        MongoAdapter.ResultCursor cur = mad.stream(query);
+
         try {
             sessionManager.selectQuery(sessionId, query);
         } catch (UnregisteredTwingoUserException e) {
             e.printStackTrace();
         }
 
-        // create demo consumer
-        KafkaConsumer<String, String> cons = new KafkaConsumer<>(pm.consumerProperties());
-        cons.subscribe(Collections.singletonList(kafkaAnalysedTopic));
-
-        // read from consumer and write to frontend
-        // TODO make fancy
         while (!response.getWriter().checkError()) {
-            waitForAssignments(cons, 10000);
-            cons.seekToEnd(cons.assignment());
-            ConsumerRecords<String, String> consumerRecords = cons.poll(Duration.ofSeconds(10L));
 
-            // TODO do something less stupid
-            sessionManager.scheduleRemoveSessionDefaultTimeout(sessionId);
-            for (ConsumerRecord record : consumerRecords.records(kafkaAnalysedTopic)) {
-                response.getWriter().write(record.value().toString() + "\r\n");
-                response.getWriter().flush();
-            }
+            Document tweet = cur.next();
+
+            response.getWriter().write(tweet.toJson() + "\r\n");
+            response.getWriter().flush();
+
         }
     }
 

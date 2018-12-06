@@ -18,6 +18,8 @@ dependencies {
     compile group: 'org.apache.kafka', name: 'kafka-clients', version: '2.0.0'
     compile group: 'javax.servlet', name: 'javax.servlet-api', version: '4.0.1'
     compile 'com.google.code.gson:gson:2.8.5'
+    compile 'org.mongodb:mongo-java-driver:3.9.1'
+
 }
 
 

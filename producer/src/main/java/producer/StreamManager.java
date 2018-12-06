@@ -42,7 +42,8 @@ public class StreamManager {
     public synchronized void addStream(Query q) {
         // if this user has already registered a query
         if (!streams.containsKey(q)) {
-            KafkaAdapter adap = new KafkaAdapter(properties, getRawTopicFromQuery(q));
+            //TODO do not hard-code the topic
+            KafkaAdapter adap = new KafkaAdapter(properties, "tweets");
             TweetStream stream = new TweetStream(properties.getProperty("twitter.consumer"), properties.getProperty("twitter.consumerSecret"), properties.getProperty("twitter.token"), properties.getProperty("twitter.tokenSecret"));
             stream.stream(q, adap);
             streams.put(q, stream);
@@ -69,13 +70,5 @@ public class StreamManager {
 
     public synchronized int activeQueries() {
         return streams.size();
-    }
-
-    public String getRawTopicFromQuery(Query q) {
-        return "UNI_tweets_" + q.toString();
-    }
-
-    public String getAnalysedTopicFromQuery(Query q) {
-        return "UNI_analyzed-tweets_" + q.toString();
     }
 }

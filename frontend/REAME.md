@@ -1,0 +1,1 @@
+Moved to producer/src/main/webapp/
