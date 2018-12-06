@@ -4,7 +4,8 @@ services:
     build: ./producer
     image: producer
     depends_on:
-      - start_dependencies
+      - kafka
+      - mongodb
     volumes:
       - ./config.properties:/usr/local/config.properties
       - ./certificates:/usr/local/certificates
@@ -14,7 +15,8 @@ services:
     build: ./analyzer
     image: analyzer
     depends_on:
-      - start_dependencies
+      - kafka
+      - mongodb
     volumes:
       - ./config.properties:/config.properties
       - ./certificates:/certificates
@@ -37,10 +39,4 @@ services:
   mongodb:
     build: ./mongodb
     ports:
-      - "27017:27017" 
-  start_dependencies:
-    image: dadarek/wait-for-dependencies
-    depends_on:
-      - kafka
-      - mongodb
-    command: kafka:9092 mongodb:27017
+      - "27017:27017"

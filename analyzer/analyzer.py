@@ -1,7 +1,8 @@
-from kafka import KafkaConsumer
+from kafka import KafkaConsumer, errors
 from kafka import KafkaProducer
 import ssl
 import time
+import sys
 from sentimentanalysis import *
 from convertcerts import pkcs12_to_pem
 import argparse
@@ -74,13 +75,27 @@ def main(input_topic,db,group_id=group_id,seek=False,stop_event=None,start_event
     else:
         sslctx = None
 
-    consumer = KafkaConsumer(
-    bootstrap_servers=conf["bootstrap.servers"],
-    group_id=group_id,
-    security_protocol=security_protocol,
-    ssl_context=sslctx,
-    consumer_timeout_ms= 1000
-    )
+    consumer = None
+    retrycount = 0
+    while consumer == None:
+        try:
+            consumer = KafkaConsumer(
+            bootstrap_servers=conf["bootstrap.servers"],
+            group_id=group_id,
+            security_protocol=security_protocol,
+            ssl_context=sslctx,
+            consumer_timeout_ms= 1000
+            )
+        except errors.NoBrokersAvailable:
+            print("Kafka unreachable. Retrying...")
+            retrycount += 1
+            if retrycount > 10:
+                print("Kafka unreachable. Giving up. \r\nMake sure you have set the correct address in the config-file AND the compose-file!")
+                sys.exit(1)
+            time.sleep(3)
+    print("Connected to kafka!")
+
+
 
 
     db_name, collection_name = db.split("/")
