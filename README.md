@@ -11,11 +11,11 @@ twitter.token = *****************
 twitter.tokenSecret = *****************
 
 # optional if you want to use different kafka or mongodb servers
-mongodb = yourkafka:27017
-bootstrap.servers = yourmongo:9092
+mongodb = yourmongo:27017
+bootstrap.servers = yourkafka:9092
 
 # The two lines below should only be there if your Kafka is using SSL. Otherwise DELETE THEM!!!
-security.protocoll = SSL
+security.protocol = SSL
 ssl.keystore.password = thepasswordforyourcertificates
 ```
 

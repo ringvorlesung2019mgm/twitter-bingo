@@ -15,7 +15,11 @@ before_install:
 matrix:
   include:
   - name: "Test java"
-    install: cd producer && ./gradlew assemble
+    install: 
+      - cd producer && ./gradlew assemble
+      - docker-compose build mongodb
+      - docker-compose up -d mongodb
+      - sleep 5
     script: ./gradlew check
   - name: "Test python"
     language: python
