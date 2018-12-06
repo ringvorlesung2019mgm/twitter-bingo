@@ -1,7 +1,31 @@
+Number.prototype.between = function(a, b) {
+	var min = Math.min.apply(Math, [a, b]),
+	  max = Math.max.apply(Math, [a, b]);
+	return this > min && this < max;
+  };
+
 var hashtagInput = angular.module('hashtagInput', [])
 hashtagInput.controller('myHashtag', function($scope) {
     $scope.Hashtag = "Hash";
 });
+
+var receivedTweets = [];
+var lowestRatedTweet = null;
+var highestRatedTweet = null;
+var averageRating;
+var sumRating = 0;
+var tweetCount = 0;
+var differanceSpan = 0;
+const lowCriteria = {
+	low : -1,
+	high: -0.5
+}
+const highCriteria = {
+	low: 0.5,
+	high: 1
+};
+var lowRatedTweets = [];
+var highRatedTweet = []
 
 var myApp = angular.module('myApp', ['ngtweet']);
 
@@ -43,7 +67,34 @@ function openTweetStreamConnection(sessionId, hashtag){
 	    ms = s.split("\r\n");
 	    for(i = 0;i<ms.length;i++){
 	        if (ms[i].length > 0){
-	            s = JSON.parse(ms[i])
+				s = JSON.parse(ms[i])
+				receivedTweets.push(s);
+				sumRating += s.rating;
+				tweetCount += 1;
+				averageRating = sumRating / tweetCount;
+				if(lowestRatedTweet == null || s.rating <= lowestRatedTweet.rating){
+					lowestRatedTweet = s;
+				}
+				if(highestRatedTweet == null || s.rating >= highestRatedTweet.rating){
+					highestRatedTweet = s;
+				}
+				// simple implementation, to be improved by statistics
+				if(s.rating.between(lowCriteria.low, lowCriteria.high)){
+					lowRatedTweets.push(s);
+				}
+				if(s.rating.between(highCriteria.low, highCriteria.high)){
+					highRatedTweet.push(s);
+				}
+				if(lowestRatedTweet != null && highestRatedTweet != null){
+					// dynamic criteria generation
+					// differanceSpan = highestRatedTweet.rating - lowestRatedTweet.rating;
+					// lowest20 = lowestRatedTweet.rating + differanceSpan*0.2;
+					// highest20 = highestRatedTweet.rating - differanceSpan*0.2;
+					
+					// 
+				}
+				var loggingobj = [sumRating, tweetCount, averageRating, lowestRatedTweet, highestRatedTweet, differanceSpan];
+				console.log(loggingobj);
 	            $("#content").append("<blockquote class=\"twitter-tweet\"><p dir=\"ltr\">" + s.text + "</p>" + s.rating + "</blockquote>")
 	            console.log("POST /api/TweetStream Tweet received");
 	        }
