@@ -35,7 +35,7 @@ public class TwingoTweet {
     private List<String> hashtags;
 
 
-    private TwingoTweet(long id, String text, String userName, Date createdAt, boolean hasGeo, double geoLat, double geoLon, boolean isRated, double rating, List<String> hashtags) {
+    public TwingoTweet(long id, String text, String userName, Date createdAt, boolean hasGeo, double geoLat, double geoLon, boolean isRated, double rating, List<String> hashtags) {
         this.id = id;
         this.text = text;
         this.userName = userName;

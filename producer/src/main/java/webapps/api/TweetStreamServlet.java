@@ -28,8 +28,8 @@ public class TweetStreamServlet extends HttpServlet {
             sb.append(s);
         }
         TwingoStreamRequest data = TwingoStreamRequest.fromJson(sb.toString());
-        UUID sessionId = data.sessionId;
-        String hashtag = data.hashtag;
+        UUID sessionId = data.getSessionId();
+        String hashtag = data.getHashtag();
 
         // set headers for chunked transfer encoding stream
         response.setHeader("Access-Control-Allow-Origin", "*");
