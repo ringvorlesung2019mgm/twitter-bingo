@@ -8,7 +8,7 @@ from convertcerts import pkcs12_to_pem
 import argparse
 import json
 from pymongo import MongoClient
-from pymongo.errors import DuplicateKeyError
+from pymongo.errors import DuplicateKeyError, NotMasterError
 from pymongo import IndexModel, ASCENDING
 import datetime
 
@@ -82,10 +82,19 @@ def subscribe_and_wait_for_assignment(consumer,topics,message=None):
 Given a mongodb collection this function creates indexes that will be usefull for later queries
 """
 def create_indexes(collection):
-    id = IndexModel([("id",ASCENDING)],unique=True)
-    hashtags = IndexModel([("hashtags",ASCENDING)])
-    created = IndexModel([("created",ASCENDING)])
-    collection.create_indexes([id,hashtags,created])
+    while True:
+        try:
+            id = IndexModel([("id",ASCENDING)],unique=True)
+            hashtags = IndexModel([("hashtags",ASCENDING)])
+            created = IndexModel([("created",ASCENDING)])
+            collection.create_indexes([id,hashtags,created])
+        except NotMasterError:
+            print("Waiting for mongodb-server to become primary...")
+            time.sleep(1)
+            continue
+        break
+
+    
 
 
 def main(input_topic,db,group_id=group_id,seek=False,stop_event=None,start_event=None,debug=False):
@@ -124,6 +133,7 @@ def main(input_topic,db,group_id=group_id,seek=False,stop_event=None,start_event
     db_name, collection_name = db.split("/")
 
     dbclient = MongoClient(conf["mongodb"])
+
     tweetcollection = dbclient[db_name][collection_name]
 
     create_indexes(tweetcollection)
