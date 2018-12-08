@@ -52,6 +52,8 @@ def test_analyzer():
     db = dbclient.twitter
     collection = db["test-tweets"]
 
+    collection.drop()
+
 
     stopEvent = threading.Event()
     startEvent = threading.Event()
