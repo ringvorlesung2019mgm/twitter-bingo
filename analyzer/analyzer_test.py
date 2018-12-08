@@ -30,7 +30,7 @@ def test_sslcontext():
 
 def test_analyzer():
     inp = "test-tweets"
-    testvalue = json.dumps({"text": "My-test","createdAt":"Dec 8, 2018 4:02:47 PM"}).encode()
+    testvalue = json.dumps({"id":123,"text": "My-test","createdAt":"Dec 8, 2018 4:02:47 PM"}).encode()
 
     conf = read_config(open("../config.properties"))
 
