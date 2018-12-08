@@ -10,43 +10,38 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.Duration;
-import java.util.UUID;
 
 
 @WebServlet("/api/TweetStream")
 public class TweetStreamServlet extends HttpServlet {
 
     PropertyManager pm = new PropertyManager();
-    SessionManager sessionManager = SessionManager.getInstance(pm.allProperties(), pm.sessionManagerProperties());
+    StreamManager sm = StreamManager.getInstance(pm.allProperties());
+
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        doPost(request,response);
+    }
 
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
-        // read request data
-        StringBuilder sb = new StringBuilder();
-        String s;
-        while ((s = request.getReader().readLine()) != null) {
-            sb.append(s);
+        String querystring = request.getParameter("q");
+        if (querystring == null){
+            response.sendError(400,"Please add a query parameter(q) to this API-Call.");
+            return;
         }
-        TwingoStreamRequest data = TwingoStreamRequest.fromJson(sb.toString());
-        UUID sessionId = data.getSessionId();
-        String hashtag = data.getHashtag();
+
+        Query query = new Query(querystring);
 
         // set headers for chunked transfer encoding stream
         response.setHeader("Access-Control-Allow-Origin", "*");
         response.setHeader("Transfer-Encoding", "chunked");
 
-
-        Query query = new producer.Query(hashtag);
-
+        // listen for new tweets matching the query in mongodb
         MongoAdapter mad = new MongoAdapter(pm.allProperties().getProperty("mongodb"));
         MongoAdapter.ResultCursor cur = mad.stream(query);
 
-        try {
-            sessionManager.selectQuery(sessionId, query);
-        } catch (UnregisteredTwingoUserException e) {
-            e.printStackTrace();
-        }
-
+        //request that a stream is started for the query
+        sm.requestStream(query);
         while (!response.getWriter().checkError()) {
 
             Document tweet = cur.next();
@@ -55,6 +50,9 @@ public class TweetStreamServlet extends HttpServlet {
             response.getWriter().flush();
 
         }
+
+        //Tell the StreamManager that we are not longer interested in tweets for the query
+        sm.releaseStream(query);
     }
 
     /**

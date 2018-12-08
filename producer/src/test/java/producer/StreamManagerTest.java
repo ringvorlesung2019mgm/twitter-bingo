@@ -11,9 +11,11 @@ public class StreamManagerTest {
     public void testAddRemove(){
         PropertyManager pm = new PropertyManager();
         Properties p = pm.allProperties();
+        StreamManager.setCleanupTaskInterval(1);
         StreamManager m = StreamManager.getInstance(p);
+        m.setRemovalTimeout(3);
 
-        Assert.assertEquals(0,m.activeQueries());
+        Assert.assertEquals(0,m.activeStreams());
 
         Query q1 = new Query("love");
         Query q2 = new Query("hate");
@@ -23,23 +25,44 @@ public class StreamManagerTest {
         Query otherq1 = new Query(new String("love"));
 
 
-        m.addStream(q1);
-        Assert.assertEquals(1,m.activeQueries());
+        m.requestStream(q1);
+        Assert.assertEquals(1,m.activeStreams());
+        Assert.assertEquals(1,m.currentUsage(q1));
 
-        m.addStream(otherq1);
-        Assert.assertEquals(1,m.activeQueries());
+        m.requestStream(otherq1);
+        Assert.assertEquals(1,m.activeStreams());
+        Assert.assertEquals(2,m.currentUsage(q1));
 
-        m.addStream(q2);
-        Assert.assertEquals(2,m.activeQueries());
+        m.requestStream(q2);
+        Assert.assertEquals(2,m.activeStreams());
+        Assert.assertEquals(1,m.currentUsage(q2));
 
-        m.removeStream(q1);
-        Assert.assertEquals(2,m.activeQueries());
+        m.releaseStream(q1);
+        Assert.assertEquals(2,m.activeStreams());
+        Assert.assertEquals(1,m.currentUsage(q1));
 
-        m.removeStream(q2);
-        Assert.assertEquals(1,m.activeQueries());
+        m.releaseStream(q1);
+        Assert.assertEquals(2,m.activeStreams());
+        Assert.assertEquals(0,m.currentUsage(q1));
 
-        m.removeStream(q1);
-        Assert.assertEquals(0,m.activeQueries());
+        try {
+            Thread.sleep(1000);
+            // This is to early. No stream should be deleted at this time
+            Assert.assertEquals(2,m.activeStreams());
+            Assert.assertEquals(0,m.currentUsage(q1));
+
+            //Now q1 should be gone and q2 should still be here
+            Thread.sleep(7000);
+            Assert.assertEquals(1,m.activeStreams());
+            Assert.assertEquals(1,m.currentUsage(q2));
+
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        m.requestStream(q2);
+
 
     }
 }

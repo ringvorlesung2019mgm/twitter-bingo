@@ -1,13 +1,10 @@
-package webapps;
+package producer;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import org.bson.Document;
 import org.junit.Assert;
 import org.junit.Test;
-import producer.Query;
-import producer.TwingoTweet;
-import producer.MongoAdapter;
 
 import java.util.Arrays;
 import java.util.Calendar;
