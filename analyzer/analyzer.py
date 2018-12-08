@@ -8,6 +8,9 @@ from convertcerts import pkcs12_to_pem
 import argparse
 import json
 from pymongo import MongoClient
+from pymongo.errors import DuplicateKeyError
+from pymongo import IndexModel, ASCENDING
+import datetime
 
 group_id = "analyzers" 
 
@@ -65,6 +68,16 @@ def wait_for_assignment(consumer,message=None):
             print(message)
         time.sleep(1)
 
+""""
+Given a mongodb collection this function creates indexes that will be usefull for later queries
+"""
+def create_indexes(collection):
+    id = IndexModel([("id",ASCENDING)],unique=True)
+    hashtags = IndexModel([("hashtags",ASCENDING)])
+    created = IndexModel([("created",ASCENDING)])
+    collection.create_indexes([id,hashtags,created])
+
+
 def main(input_topic,db,group_id=group_id,seek=False,stop_event=None,start_event=None,debug=False):
     conf = read_config(open("../config.properties"))
 
@@ -103,6 +116,7 @@ def main(input_topic,db,group_id=group_id,seek=False,stop_event=None,start_event
     dbclient = MongoClient(conf["mongodb"])
     tweetcollection = dbclient[db_name][collection_name]
 
+    create_indexes(tweetcollection)
 
     consumer.subscribe(topics=(input_topic,))
     wait_for_assignment(consumer,"Analyzer waiting for assignments")
@@ -127,7 +141,15 @@ def main(input_topic,db,group_id=group_id,seek=False,stop_event=None,start_event
             sentiment = get_tweet_sentiment(tweet["text"])
             tweet["rating"]=sentiment
             tweet["isRated"]=True
-            tweetcollection.insert_one(tweet)
+            tweet["createdAt"]=datetime.datetime.strptime(tweet["createdAt"],"%b %d, %Y %I:%M:%S %p")
+            try:
+                tweetcollection.insert_one(tweet)
+            except DuplicateKeyError:
+                # There is already a tweet with this id in the db. Nothing left to do, go on.
+                if debug:
+                    print ("Ignoring duplicate:",tweet["id"])
+                pass
+
             if debug:
                 print ("From:",msg.topic," : ",tweet)
             if stop_event:
