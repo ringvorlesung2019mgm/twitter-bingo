@@ -58,15 +58,25 @@ def create_sslcontext(password):
     return ctx
 
 """
-Wait until the assignment of partitions to the consumer is completed.
+Subscribe a list of topics and wait until the assignment of partitions to the consumer is completed.
 If message is not None it will be printed every second while waiting
+After some unsuccessfull waits for assignments the subscription is retired
 """
-def wait_for_assignment(consumer,message=None):
+def subscribe_and_wait_for_assignment(consumer,topics,message=None):
+    count = 0
+    consumer.subscribe(topics=topics)
     consumer.poll(0)
     while not consumer.assignment():
         if message:
             print(message)
         time.sleep(1)
+        count += 1
+        if count == 10:
+            if message:
+                print("Assignment still not received. Renewing subscription")
+            consumer.subscribe(topics=topics)
+            consumer.poll(0)
+            count = 0
 
 """"
 Given a mongodb collection this function creates indexes that will be usefull for later queries
@@ -118,8 +128,7 @@ def main(input_topic,db,group_id=group_id,seek=False,stop_event=None,start_event
 
     create_indexes(tweetcollection)
 
-    consumer.subscribe(topics=(input_topic,))
-    wait_for_assignment(consumer,"Analyzer waiting for assignments")
+    subscribe_and_wait_for_assignment(consumer,(input_topic,),"Analyzer waiting for assignments")
 
     if seek == "begin":
         consumer.seek_to_beginning()
