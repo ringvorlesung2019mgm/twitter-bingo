@@ -7,7 +7,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import producer.Query;
 import producer.TwingoTweet;
-import webapps.api.MongoAdapter;
+import producer.MongoAdapter;
 
 import java.util.Arrays;
 import java.util.Calendar;
