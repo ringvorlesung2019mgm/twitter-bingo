@@ -1,4 +1,4 @@
-package webapps;
+package producer;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
