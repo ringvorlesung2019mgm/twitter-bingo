@@ -3,5 +3,6 @@ certificates/*
 __pycache__
 .pytest_cache
 *.pyc
+.idea/
 
 producer/\.idea/

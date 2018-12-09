@@ -17,6 +17,8 @@ services:
     depends_on:
       - kafka
       - mongodb
+    environment:
+      - PYTHONUNBUFFERED=0
     volumes:
       - ./config.properties:/config.properties
       - ./certificates:/certificates

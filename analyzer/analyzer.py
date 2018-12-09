@@ -8,6 +8,9 @@ from convertcerts import pkcs12_to_pem
 import argparse
 import json
 from pymongo import MongoClient
+from pymongo.errors import DuplicateKeyError, NotMasterError
+from pymongo import IndexModel, ASCENDING
+import datetime
 
 group_id = "analyzers" 
 
@@ -55,15 +58,44 @@ def create_sslcontext(password):
     return ctx
 
 """
-Wait until the assignment of partitions to the consumer is completed.
+Subscribe a list of topics and wait until the assignment of partitions to the consumer is completed.
 If message is not None it will be printed every second while waiting
+After some unsuccessfull waits for assignments the subscription is retired
 """
-def wait_for_assignment(consumer,message=None):
+def subscribe_and_wait_for_assignment(consumer,topics,message=None):
+    count = 0
+    consumer.subscribe(topics=topics)
     consumer.poll(0)
     while not consumer.assignment():
         if message:
             print(message)
         time.sleep(1)
+        count += 1
+        if count == 10:
+            if message:
+                print("Assignment still not received. Renewing subscription")
+            consumer.subscribe(topics=topics)
+            consumer.poll(0)
+            count = 0
+
+""""
+Given a mongodb collection this function creates indexes that will be usefull for later queries
+"""
+def create_indexes(collection):
+    while True:
+        try:
+            id = IndexModel([("id",ASCENDING)],unique=True)
+            hashtags = IndexModel([("hashtags",ASCENDING)])
+            created = IndexModel([("created",ASCENDING)])
+            collection.create_indexes([id,hashtags,created])
+        except NotMasterError:
+            print("Waiting for mongodb-server to become primary...")
+            time.sleep(1)
+            continue
+        break
+
+    
+
 
 def main(input_topic,db,group_id=group_id,seek=False,stop_event=None,start_event=None,debug=False):
     conf = read_config(open("../config.properties"))
@@ -101,11 +133,12 @@ def main(input_topic,db,group_id=group_id,seek=False,stop_event=None,start_event
     db_name, collection_name = db.split("/")
 
     dbclient = MongoClient(conf["mongodb"])
+
     tweetcollection = dbclient[db_name][collection_name]
 
+    create_indexes(tweetcollection)
 
-    consumer.subscribe(topics=(input_topic,))
-    wait_for_assignment(consumer,"Analyzer waiting for assignments")
+    subscribe_and_wait_for_assignment(consumer,(input_topic,),"Analyzer waiting for assignments")
 
     if seek == "begin":
         consumer.seek_to_beginning()
@@ -127,7 +160,15 @@ def main(input_topic,db,group_id=group_id,seek=False,stop_event=None,start_event
             sentiment = get_tweet_sentiment(tweet["text"])
             tweet["rating"]=sentiment
             tweet["isRated"]=True
-            tweetcollection.insert_one(tweet)
+            tweet["createdAt"]=datetime.datetime.strptime(tweet["createdAt"],"%b %d, %Y %I:%M:%S %p")
+            try:
+                tweetcollection.insert_one(tweet)
+            except DuplicateKeyError:
+                # There is already a tweet with this id in the db. Nothing left to do, go on.
+                if debug:
+                    print ("Ignoring duplicate:",tweet["id"])
+                pass
+
             if debug:
                 print ("From:",msg.topic," : ",tweet)
             if stop_event:

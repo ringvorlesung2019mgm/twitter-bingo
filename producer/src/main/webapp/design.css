@@ -30,7 +30,7 @@ blockquote.twitter-tweet {
 	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
 	margin: 10px 5px;
 	padding: 16px 16px 16px;
-	max-width: 468px;
+	width: 415px;
 	float: left;
 }
 
@@ -61,10 +61,11 @@ blockquote.twitter-tweet a:hover, blockquote.twitter-tweet a:focus {
     display: flex;
     justify-content:center;
     align-content:center;
-    flex-direction:column; 
+    flex-direction:column;
     border-radius:50%;
     color:white;
     font-weight: bold;
+    width: 9px;
 }
 
 .tweet-window {
@@ -72,7 +73,7 @@ blockquote.twitter-tweet a:hover, blockquote.twitter-tweet a:focus {
 	border-width: 2px;
 	border-style: solid;
 	height: 400px;
-	width: 500px;
+	width: 530px;
 	overflow-x: hidden;
 	overflow-y: scroll;
 	scrollbar-base-color: grey;

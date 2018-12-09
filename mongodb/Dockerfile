@@ -1,3 +1,3 @@
 FROM mongo
-COPY replconfig.js /docker-entrypoint-initdb.d/replconfig.js
+COPY *.js /docker-entrypoint-initdb.d/
 CMD ["mongod", "--replSet", "rs0"]

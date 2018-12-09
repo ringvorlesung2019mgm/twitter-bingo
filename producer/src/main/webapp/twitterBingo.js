@@ -27,38 +27,28 @@ const highCriteria = {
 var lowRatedTweets = [];
 var highRatedTweet = []
 
-var myApp = angular.module('myApp', ['ngtweet']);
+//TweetStream
+var tweetApp = angular.module('tweetApp', []);
 
-$(document).ready(function(){
-    var hashtag = "love";
+tweetApp.controller('tweetStream', function($scope) {
+$scope.hashtag='';
+
+$scope.loadHashtag = function(){
+    $( "#content" ).empty();
     var baseUrl = "http://localhost:8080/producer/api/"
-    console.log("Twitter Bingo started");
-    console.log("GET /api/GetToken started")
-
-    $.get(baseUrl + "GetToken", function(response){
-        var response_json = JSON.parse(response);
-        console.log("GET /api/GetToken finished");
-        console.log(response_json);
-        openTweetStreamConnection(response_json.sessionId, hashtag);
-    });
+    openTweetStreamConnection($scope.hashtag);
+};
 
 });
 
-
 // based on https://stackoverflow.com/questions/33635919/xmlhttprequest-chunked-response-only-read-last-response-in-progress
-function openTweetStreamConnection(sessionId, hashtag){
+function openTweetStreamConnection(hashtag){
 
-    var payload = {
-        'sessionId' : sessionId,
-        'hashtag' : hashtag
-    }
 	var last_index = 0;
     var xhr = new XMLHttpRequest()
-    xhr.open("POST", "http://localhost:8080/producer/api/TweetStream", true)
-	xhr.setRequestHeader('Content-type', 'application/json; charset=UTF-8');
-	xhr.send(JSON.stringify(payload));
-	console.log("POST /api/TweetStream started");
-	console.log(payload);
+    xhr.open("POST", "http://localhost:8080/producer/api/TweetStream?q="+hashtag, true)
+	xhr.setRequestHeader('Content-type', 'application/json; charset=UTF-8')
+	xhr.send()
     xhr.onprogress = function () {
 	    var curr_index = xhr.responseText.length;
 	    if (last_index == curr_index) return;
@@ -95,7 +85,8 @@ function openTweetStreamConnection(sessionId, hashtag){
 				}
 				var loggingobj = [sumRating, tweetCount, averageRating, lowestRatedTweet, highestRatedTweet, differanceSpan];
 				console.log(loggingobj);
-	            $("#content").append("<blockquote class=\"twitter-tweet\"><p dir=\"ltr\">" + s.text + "</p>" + s.rating + "</blockquote>")
+				var rating = s.rating.toFixed(1);
+	            $("#content").append("<blockquote class=\"twitter-tweet\"><p dir=\"ltr\">" + s.text + "</p></blockquote><div class=\"sentiment-number\">"+ rating +"</div>")
 	            console.log("POST /api/TweetStream Tweet received");
 	        }
 	    }

@@ -30,7 +30,7 @@ def test_sslcontext():
 
 def test_analyzer():
     inp = "test-tweets"
-    testvalue = json.dumps({"text": "My-test"}).encode()
+    testvalue = json.dumps({"id":123,"text": "My-test","createdAt":"Dec 8, 2018 4:02:47 PM"}).encode()
 
     conf = read_config(open("../config.properties"))
 
@@ -52,11 +52,13 @@ def test_analyzer():
     db = dbclient.twitter
     collection = db["test-tweets"]
 
+    collection.drop()
+
 
     stopEvent = threading.Event()
     startEvent = threading.Event()
 
-    analyzerThread = threading.Thread(target=main,args=(inp,"twitter/test-tweets","analyzers","end",stopEvent,startEvent,True))
+    analyzerThread = threading.Thread(target=main,args=(inp,"twitter/test-tweets","test-analyzers","end",stopEvent,startEvent,True))
     analyzerThread.daemon = True
     analyzerThread.start()
 
