@@ -19,60 +19,25 @@
 </head>
 <body>
 
-	<!-- Überschrift -->
+	<!-- Headline -->
 	<div>
-		<h1>Twitter Bingo</h1>
+		<h1>Twitter-Bingo</h1>
 	</div>
 
-	<!-- Hashtag-Eingabe -->
-	<div ng-app="hashtagInput" ng-controller="myHashtag">
+	<!-- Hashtag-Input -->
+	<div ng-app="tweetApp" ng-controller="tweetStream">
 		<p>
+		<form ng-submit="loadHashtag()">
 			<input class="center-block" type="text" minlength="1" maxlength="31"
-				placeholder="#Hashtag" ng-model="hashtag">
+				   placeholder="#Hashtag" ng-model="hashtag">
+		</form>
 		</p>
 	</div>
 
-	<!-- Tweet-Fenster -->
+	<!-- Tweet-Window -->
 	<div class="tweet-window">		
 		<div id="content">
-			<blockquote class="twitter-tweet">
-				<p dir="ltr">"Lustiger Tweet über NMR" ~@janboehm
-					#käseschorle</p>
-				— Aru (@IAmAru) June 10, 2015
-			</blockquote>
-			
-			<div class="sentiment-number">
-				2
-			</div>
-			
-			<blockquote class="twitter-tweet">
-				<p dir="ltr">"Lustiger Tweet über NMR" ~@janboehm
-					#käseschorle</p>
-				— Aru (@IAmAru) June 10, 2015
-			</blockquote>
-			<div class="sentiment-number">
-				2
-			</div>
-			
-						<blockquote class="twitter-tweet">
-				<p dir="ltr">"Lustiger Tweet über NMR" ~@janboehm
-					#käseschorle</p>
-				— Aru (@IAmAru) June 10, 2015
-			</blockquote>
-			<div class="sentiment-number">
-				2
-			</div>
-			
-						<blockquote class="twitter-tweet">
-				<p dir="ltr">"Lustiger Tweet über NMR" ~@janboehm
-					#käseschorle</p>
-				— Aru (@IAmAru) June 10, 2015
-			</blockquote>
-			<div class="sentiment-number">
-				2
-			</div>
-		
-			
+			<!-- loaded Tweets -->
 		</div>
 	</div>
 </body>
