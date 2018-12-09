@@ -4,11 +4,6 @@ Number.prototype.between = function(a, b) {
 	return this > min && this < max;
   };
 
-var hashtagInput = angular.module('hashtagInput', [])
-hashtagInput.controller('myHashtag', function($scope) {
-    $scope.Hashtag = "Hash";
-});
-
 var receivedTweets = [];
 var lowestRatedTweet = null;
 var highestRatedTweet = null;
@@ -34,12 +29,10 @@ tweetApp.controller('tweetStream', function($scope) {
 $scope.hashtag='';
 
 $scope.loadHashtag = function(){
-    $( "#content" ).empty();
+    $scope.tweetArray = [];
     var baseUrl = "http://localhost:8080/producer/api/"
     openTweetStreamConnection($scope.hashtag);
 };
-
-});
 
 // based on https://stackoverflow.com/questions/33635919/xmlhttprequest-chunked-response-only-read-last-response-in-progress
 function openTweetStreamConnection(hashtag){
@@ -85,11 +78,23 @@ function openTweetStreamConnection(hashtag){
 				}
 				var loggingobj = [sumRating, tweetCount, averageRating, lowestRatedTweet, highestRatedTweet, differanceSpan];
 				console.log(loggingobj);
-				var rating = s.rating.toFixed(1);
-	            $("#content").append("<blockquote class=\"twitter-tweet\"><p dir=\"ltr\">" + s.text + "</p></blockquote><div class=\"sentiment-number\">"+ rating +"</div>")
+				var rankingDecimal = s.rating.toFixed(1);
+				var tweetText = s.text;
+				var tweetAuthor = "- " + s.userName;
+
+                var tweetObject = {
+                    text: tweetText,
+                    ranking: rankingDecimal,
+                    author: tweetAuthor,
+                };
+                $scope.tweetArray.push(tweetObject);
+
+                $scope.$apply();
+	            //$("#content").append("<blockquote class=\"twitter-tweet\"><p dir=\"ltr\">" + s.text + "</p></blockquote><div class=\"sentiment-number\">"+ rating +"</div>")
 	            console.log("POST /api/TweetStream Tweet received");
 	        }
 	    }
 	    // console.log(s)
 	}
 }
+});

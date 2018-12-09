@@ -1,44 +1,52 @@
 <!doctype html>
 <html>
+
 <head>
-<title>Twitter Bingo</title>
-<script
+    <title>Twitter Bingo</title>
+    <script
             src="https://code.jquery.com/jquery-3.3.1.js"
             integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
             crossorigin="anonymous">
-</script>
-<script
-	src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js">
-</script>
-<script src="twitterBingo.js" charset="utf-8" defer>
-</script>
-<link href="design.css" rel="stylesheet">
-
-
-
+    </script>
+    <script
+            src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js">
+    </script>
+    <script src="twitterBingo.js" charset="utf-8" defer>
+    </script>
+    <link href="design.css" rel="stylesheet">
 </head>
+
 <body>
+<div ng-app="tweetApp" ng-controller="tweetStream">
+    <!-- Headline -->
+    <div>
+        <h1>Twitter-Bingo</h1>
+    </div>
 
-	<!-- Headline -->
-	<div>
-		<h1>Twitter-Bingo</h1>
-	</div>
+    <!-- Hashtag-Input -->
+    <div>
+        <p>
+        <form ng-submit="loadHashtag()">
+            <input class="center-block" type="text" minlength="1" maxlength="31"
+                   placeholder="#Hashtag" ng-model="hashtag">
+        </form>
+        </p>
+    </div>
 
-	<!-- Hashtag-Input -->
-	<div ng-app="tweetApp" ng-controller="tweetStream">
-		<p>
-		<form ng-submit="loadHashtag()">
-			<input class="center-block" type="text" minlength="1" maxlength="31"
-				   placeholder="#Hashtag" ng-model="hashtag">
-		</form>
-		</p>
-	</div>
-
-	<!-- Tweet-Window -->
-	<div class="tweet-window">		
-		<div id="content">
-			<!-- loaded Tweets -->
-		</div>
-	</div>
+    <!-- Tweet-Window -->
+    <div class="tweet-window">
+        <div id="content">
+            <!--loaded Tweets-->
+            <div ng-repeat="x in tweetArray track by $index">
+            <blockquote class="twitter-tweet">
+                <p id='tweets' dir="ltr">{{x.text}}</p>
+                {{x.author}}
+            </blockquote>
+            <div class="sentiment-number"> {{x.ranking}}</div>
+            </div>
+        </div>
+    </div>
+</div>
 </body>
+
 </html>
