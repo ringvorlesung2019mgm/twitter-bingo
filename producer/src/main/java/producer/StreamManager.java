@@ -5,32 +5,35 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-/** Handles creation and removal of tweet-streams and takes care that multiple users with the same query can safely share a single TweetStream
+/**
+ * Handles creation and removal of {@link TweetStream}.
+ * Takes care that multiple users with the same query can safely share a single TweetStream.
  *
+ * @author db
  */
 public class StreamManager {
 
     private HashMap<Query, TweetStream> streams = new HashMap<>();
     private HashMap<Query, Integer> counts = new HashMap<>();
-    private HashMap<Query,Long> sheduledRemovals = new HashMap<>();
+    private HashMap<Query, Long> sheduledRemovals = new HashMap<>();
     private Properties properties;
     private ScheduledThreadPoolExecutor removalTaskSheduler;
     private static long cleanupTaskInterval = 60;
-    private long removalTimeout = 5*60;
+    private long removalTimeout = 5 * 60;
 
     static StreamManager instance;
 
     private StreamManager(Properties properties) {
         this.properties = properties;
-        Runnable queryRemovalTask = new Runnable(){
+        Runnable queryRemovalTask = new Runnable() {
 
             @Override
             public void run() {
                 removeStreams();
             }
         };
-        removalTaskSheduler= (ScheduledThreadPoolExecutor) Executors.newScheduledThreadPool(1);
-        removalTaskSheduler.scheduleWithFixedDelay(queryRemovalTask, cleanupTaskInterval, cleanupTaskInterval,TimeUnit.SECONDS);
+        removalTaskSheduler = (ScheduledThreadPoolExecutor) Executors.newScheduledThreadPool(1);
+        removalTaskSheduler.scheduleWithFixedDelay(queryRemovalTask, cleanupTaskInterval, cleanupTaskInterval, TimeUnit.SECONDS);
 
     }
 
@@ -41,7 +44,8 @@ public class StreamManager {
         return instance;
     }
 
-    /** Request the creation of a stream for the given query. If no such stream exists one is created, else the existing one is used and the usage-counter is increased
+    /**
+     * Request the creation of a stream for the given query. If no such stream exists one is created, else the existing one is used and the usage-counter is increased
      *
      * @param q
      */
@@ -57,12 +61,13 @@ public class StreamManager {
             counts.put(q, 0);
         }
         counts.put(q, counts.get(q) + 1);
-        if (sheduledRemovals.containsKey(q)){
+        if (sheduledRemovals.containsKey(q)) {
             sheduledRemovals.remove(q);
         }
     }
 
-    /** Signals the StreamManager that one user is not longer interested in the given query.
+    /**
+     * Signals the StreamManager that one user is not longer interested in the given query.
      * If no user is left for a query the associated stream is sheduled for removal and will finally be removed after a certain duration.
      * If a new user requests a query that is sheduled for removal the removal of the Stream will be aborted and the Stream will be reused.
      *
@@ -75,20 +80,19 @@ public class StreamManager {
         }
         count--;
         if (count == 0) {
-            sheduledRemovals.put(q,System.currentTimeMillis()+1000* removalTimeout);
+            sheduledRemovals.put(q, System.currentTimeMillis() + 1000 * removalTimeout);
         }
         counts.put(q, count);
     }
 
-    /** Iterates over the streams sheduled for removal and removes the ones that have reached their timeout.
-     *
+    /**
+     * Iterates over the streams sheduled for removal and removes the ones that have reached their timeout.
      */
-    private synchronized void removeStreams(){
-        Iterator<Map.Entry<Query,Long>> it = sheduledRemovals.entrySet().iterator();
+    private synchronized void removeStreams() {
+        Iterator<Map.Entry<Query, Long>> it = sheduledRemovals.entrySet().iterator();
 
-        while (it.hasNext())
-        {
-            Map.Entry<Query,Long> entry = it.next();
+        while (it.hasNext()) {
+            Map.Entry<Query, Long> entry = it.next();
             if (entry.getValue() < System.currentTimeMillis()) {
                 it.remove();
                 TweetStream stream = streams.get(entry.getKey());
@@ -99,33 +103,43 @@ public class StreamManager {
         }
     }
 
-    /** Set the interval in which the removal task should run. Must be called before the first getInstance() call.
+    /**
+     * Set the interval in which the removal task should run. Must be called before the first getInstance() call.
      *
      * @param cleanupTaskInterval The interval in seconds
      */
     public static void setCleanupTaskInterval(long cleanupTaskInterval) {
-        if (instance != null){
+        if (instance != null) {
             throw new IllegalStateException("CleanupTaskInterval can only be set before the first call to getInstance()");
         }
         StreamManager.cleanupTaskInterval = cleanupTaskInterval;
     }
 
-    /** Set the timeout after which an unused stream is finally removed
-     * @param removalTimeout The timeout in seconds
+    /**
+     * Set the timeout after which an unused stream is finally removed
+     *
+     * @param removalTimeout the timeout in seconds
      */
     public synchronized void setRemovalTimeout(long removalTimeout) {
         this.removalTimeout = removalTimeout;
     }
 
-    /** Returns the number of currently active streams
+    /**
+     * Returns the number of currently active streams.
+     *
+     * @return count of currently active streams
      */
     public synchronized int activeStreams() {
         return streams.size();
+
     }
 
-    /** Returns how many users/requests are currently interested in the given query
+    /**
+     * Returns how many users/requests are currently interested in the given query.
+     *
+     * @return count of active users for query
      */
-    public synchronized int currentUsage(Query q){
-        return counts.getOrDefault(q,0);
+    public synchronized int currentUsage(Query q) {
+        return counts.getOrDefault(q, 0);
     }
 }

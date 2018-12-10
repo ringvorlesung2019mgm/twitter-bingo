@@ -8,12 +8,16 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.changestream.ChangeStreamDocument;
 import org.bson.Document;
-import producer.Query;
 
 import java.util.Iterator;
 
 
+/**
+ * Streams tweets for a given query from mongodb.
+ */
 public class MongoAdapter {
+
+    // TODO move to config
     public static final String DEFAULT_DB = "twitter";
     public static final String DEFAULT_COLLECTION = "tweets";
 
@@ -26,6 +30,14 @@ public class MongoAdapter {
         }
     }
 
+    /**
+     * Starts a stream from mongodb.
+     *
+     * @param q query
+     * @param db mongodb database string
+     * @param collection mongodb collection string
+     * @return Cursor pointing to results
+     */
     public ResultCursor stream(Query q,String db, String collection){
         MongoCollection coll = client.getDatabase(db).getCollection(collection);
         FindIterable existing = coll.find(q.getMongodbQuery());
@@ -35,6 +47,11 @@ public class MongoAdapter {
         return new ResultCursor(existing.iterator(),incoming.iterator());
     }
 
+    /**
+     * Starts a stream from mongodb
+     * @param q query
+     * @return Cursor pointing to results
+     */
     public ResultCursor stream(Query q){
         return stream(q,DEFAULT_DB,DEFAULT_COLLECTION);
     }

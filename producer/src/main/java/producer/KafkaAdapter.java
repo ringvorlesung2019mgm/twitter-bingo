@@ -11,21 +11,23 @@ import twitter4j.StatusListener;
 import java.util.Properties;
 
 
-/** Receives tweets via .onStatus() and pushes all received tweets into kafka
+/**
+ * Receives tweets via .onStatus() and pushes all received tweets into kafka.
  *
+ * @author db
  */
 public class KafkaAdapter implements StatusListener {
+
     private Producer<String,String> producer;
     private String topic;
 
     /**
-     *
-     * @param kafkaProperties The properties vor the kafka producer
+     * @param kafkaProperties The properties for the kafka producer
      * @param topic The topic to which all tweets are pushed
      */
     public KafkaAdapter(Properties kafkaProperties,String topic){
         this.topic = topic;
-        producer = new KafkaProducer<>(kafkaProperties);
+        this.producer = new KafkaProducer<>(kafkaProperties);
     }
 
 
@@ -39,6 +41,9 @@ public class KafkaAdapter implements StatusListener {
             producer.flush();
         }
     }
+
+
+    // TODO throw notimplemented exceptions here?
 
     @Override
     public void onDeletionNotice(StatusDeletionNotice statusDeletionNotice) {

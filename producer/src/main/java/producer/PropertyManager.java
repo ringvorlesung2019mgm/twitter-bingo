@@ -12,7 +12,8 @@ import java.util.Calendar;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
-/** Handles all configuration-related stuff.
+/**
+ * Handles all configuration-related stuff.
  *
  */
 public class PropertyManager {
@@ -40,7 +41,8 @@ public class PropertyManager {
         this(CONFIG_PATH);
     }
 
-    /*** Populate some empty optional config-fields with default-values derived from other user-provided options
+    /**
+     *  Populate some empty optional config-fields with default-values derived from other user-provided options
      *
      * @param p
      */
