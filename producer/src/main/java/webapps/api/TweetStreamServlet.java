@@ -32,7 +32,8 @@ public class TweetStreamServlet extends HttpServlet {
 
         // set headers for chunked transfer encoding stream
         response.setHeader("Access-Control-Allow-Origin", "*");
-        response.setHeader("Transfer-Encoding", "chunked");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/json");
 
         // listen for new tweets matching the query in mongodb
         MongoAdapter mad = new MongoAdapter(pm.allProperties().getProperty("mongodb"));
