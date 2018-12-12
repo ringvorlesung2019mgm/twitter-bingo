@@ -15,6 +15,10 @@ import static org.mockito.Mockito.*;
 public class TweetStreamServletTest {
 
 
+    /**
+     * Tests if correct exception is thrown when no query is given.
+     * @throws IOException
+     */
     @Test
     public void testServletWithoutQuery() throws IOException {
         HttpServletRequest request = mock(HttpServletRequest.class);
@@ -28,6 +32,11 @@ public class TweetStreamServletTest {
         verify(response, times(1)).sendError(400, "Please add a query parameter(q) to this API-Call.");
     }
 
+    /**
+     * Tests if tweets are beeing streamed for hashtag "love".
+     * @throws IOException
+     * @throws InterruptedException
+     */
     @Test
     public void testServlet() throws IOException, InterruptedException {
 
@@ -43,10 +52,27 @@ public class TweetStreamServletTest {
         TweetStreamServlet tweetStreamServlet = new TweetStreamServlet();
         tweetStreamServlet.doPost(request, response);
 
-        Thread.sleep(5000);
+        Thread.sleep(1000);
 
         assert stringWriter.toString() != "";
-
     }
 
+    /**
+     * Tests if the correct headers were set in TweetStreamServlet response.
+     * @throws IOException
+     */
+    @Test
+    public void testServletHeader() throws IOException {
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
+
+        TweetStreamServlet tweetStreamServlet = new TweetStreamServlet();
+        tweetStreamServlet.doPost(request, response);
+
+
+        // TODO do different, this is more of a hotfix
+        verify(response, times(1)).setHeader("Access-Control-Allow-Origin", "*");
+        verify(response, times(1)).setCharacterEncoding("UTF-8");
+        verify(response, times(1)).setContentType("text/json");
+    }
 }

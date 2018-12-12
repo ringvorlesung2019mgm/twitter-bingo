@@ -9,7 +9,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-
+/**
+ * Receives a query and streams rated tweets matching this query to the user.
+ *
+ * @author jp & db
+ */
 @WebServlet("/api/TweetStream")
 public class TweetStreamServlet extends HttpServlet {
 
