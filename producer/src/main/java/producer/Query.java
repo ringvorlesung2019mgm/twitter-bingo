@@ -6,6 +6,7 @@ import twitter4j.FilterQuery;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * Represetns a user-query for tweets.
@@ -14,24 +15,40 @@ import java.util.List;
  */
 public class Query {
 
-    private String hashtag;
+    private String queryString;
 
-    public Query(String hashtag) {
-        this.hashtag = hashtag;
+    /** This regex matches all characters we do not want to have in a query-string
+     *
+     */
+    private static final Pattern unwantedCharacters = Pattern.compile("[^a-zA-Z0-9]+");
+
+    public Query(String queryString) {
+        this.queryString = normalizeQuerystring(queryString);
     }
+
+
+    /** Cleans and normalizes a user-supplied query and returns a proper query-string
+     *
+     * @param input some query-string
+     * @return a normalized and cleaned query-string
+     */
+    private static String normalizeQuerystring(String input){
+        return unwantedCharacters.matcher(input).replaceAll("").toLowerCase();
+    }
+
 
     /**
      * Convert this query to a Twitter4J-producer.Query
      */
     public twitter4j.Query getT4JQuery() {
-        return new twitter4j.Query("#" + hashtag);
+        return new twitter4j.Query("#" + queryString);
     }
 
     /**
      * Convert this query to a Twitter4J-FilterQuery
      */
     public FilterQuery getT4JFilterQuery() {
-        return new FilterQuery("#" + hashtag);
+        return new FilterQuery("#" + queryString);
     }
 
 
@@ -39,22 +56,26 @@ public class Query {
      * Returns a mongodb filter that matches this query
      */
     public Bson getMongodbQuery() {
-        return new Document("hashtags", hashtag);
+        return new Document("hashtags", queryString);
     }
 
+    /** Returns a mongodb changestream filter matching this query
+     * ChangeStream filters are a little bit different from "regular" mongodb filters.
+     * @return
+     */
     public List<Bson> getMongodbChangestreamFilter() {
-        return Arrays.asList(new Document("$match", new Document("fullDocument.hashtags", hashtag)));
+        return Arrays.asList(new Document("$match", new Document("fullDocument.hashtags", queryString)));
     }
 
     @Override
     public String toString() {
-        return hashtag;
+        return queryString;
     }
 
     @Override
     public boolean equals(Object o) {
         if (o instanceof Query) {
-            if (((Query) o).hashtag.equals(hashtag)) {
+            if (((Query) o).queryString.equals(queryString)) {
                 return true;
             }
         }
@@ -63,6 +84,6 @@ public class Query {
 
     @Override
     public int hashCode() {
-        return hashtag.hashCode();
+        return queryString.hashCode();
     }
 }

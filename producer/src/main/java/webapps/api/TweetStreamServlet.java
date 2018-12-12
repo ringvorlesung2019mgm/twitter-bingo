@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.URLDecoder;
 
 /**
  * Receives a query and streams rated tweets matching this query to the user.
@@ -32,6 +33,15 @@ public class TweetStreamServlet extends HttpServlet {
             return;
         }
 
+        if (querystring.equals("")) {
+            response.sendError(400, "Query-string can not be empty. Maybe you included a # without URL-encoding the string?");
+            return;
+        }
+
+        // query strings should be URL-encoded. Decode them!
+        querystring = URLDecoder.decode(querystring,"UTF-8");
+
+        // The Query Class will handle filtering and normalizing the string
         Query query = new Query(querystring);
 
         // set headers for chunked transfer encoding stream
