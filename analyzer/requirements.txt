@@ -4,3 +4,5 @@ kafka-python
 pyopenssl
 pytest
 pymongo
+langdetect
+nltk
