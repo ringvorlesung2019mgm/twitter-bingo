@@ -11,6 +11,7 @@ from pymongo import MongoClient
 from pymongo.errors import DuplicateKeyError, NotMasterError
 from pymongo import IndexModel, ASCENDING
 import datetime
+import nltk
 
 group_id = "analyzers"
 
@@ -18,6 +19,13 @@ group_id = "analyzers"
 Quick and dirty way to read java propertie files as pyjavaproperties seems to be broken.
 Will probably break on non-trivial config files.
 """
+
+# Textblob depends on NTLK and NTLK needs additional data that can not be installed via pip
+# check if the required NTLK-Data exists and if not automatically download them
+try:
+    nltk.data.find('tokenizers/punkt')
+except LookupError:
+    nltk.download('punkt')
 
 
 def read_config(file):

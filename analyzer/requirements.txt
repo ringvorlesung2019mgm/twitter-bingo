@@ -5,3 +5,4 @@ pyopenssl
 pytest
 pymongo
 langdetect
+nltk
