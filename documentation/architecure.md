@@ -1,66 +1,52 @@
 # **Architektur**
 
 # Komponenten
-Endziel: Jede Komponente ist ein eigenständiges Programm und kommuniziert mit den anderen Komponenten ausschließlich über Kafka (und ggf. Zookeeper). Von jeder Komponente können jederzeit mehrere Instanzen gleichzeizig laufen um Lastverteilung, Ausfallsicherheit und unterbrechungsfreie Updates zu ermöglichen. (Microservice)
+Jede Komponente ist ein eigenständiges Programm und kommuniziert mit den anderen Komponenten ausschließlich festgelegte Schnittstellen. Von jeder Komponente können jederzeit mehrere Instanzen gleichzeizig laufen um Lastverteilung, Ausfallsicherheit und unterbrechungsfreie Updates zu ermöglichen. (Microservice)
 
 Übergangsweise wird ersteinmal davon ausgegangen, dass von jeder Komponente nur eine Instanz existiert. Außerdem können mehrere Komponenten (z.B. Producer und Webapp) in einem einzelnen Programm zusammengefasst werden. (Monolith)
 
 
-![alt text](arch.png "Logo Title Text 1")
+![alt text](arch.png "Architektur von Twitter-Bingo")
 
 
 ## **Producer**
-Der Producer ruft basierend auf von den Endnutzern vorgegebenen Filterkriterien (Hashtags,Userhandles,Geolocation) Tweets von der Twitter-API ab und speichert sie in Kafka. Die Tweets werden dabei anhand der Filterkriterien auf mehrere Kafka-Topics aufgeteilt (es landen NICHT alle tweets im gleichen topic!).
+
+Der Producer ist eine Java-Anwendung.
+
+Der Producer ruft basierend auf von den Endnutzern vorgegebenen Filterkriterien (Hashtags,Userhandles,Geolocation) Tweets von der Twitter-API ab und speichert sie in den Kafka. Es existiert nur ein Kafka-Topic für Rohtweets, in dem alle geladenen Tweets liegen. 
 
 Die Anfrage eines Nutzers nach Tweets die einem bestimmten Filter entsprechen wird im folgenden Abo genannt.
+Ein Producer kann mit einem Thread parallel mehrere Abos bearbeiten, sofern diese die gleichen Filter anfordern. Existiert zu einem von einem Nutzer angeforderten Abo bereits ein Producer-Thread (Nutzer a analysiert bereits #tatort und Nutzer b will das nun auch tun) wird kein neuer Thread gestartet, sondern der bereits bestehende weiter verwendet.
 
-Jeder Producer bearbeitet mit einem Thread pro Abo parallel mehrere Abo. Existiert zu einem von einem Nutzer angeforderten Abo bereits ein Producer-Thread (Nutzer a analysiert bereits #tatort und Nutzer b will das nun auch tun) wird kein neuer Thread gestartet, sondern der bereits bestehende weiter verwendet.
-
-Da mehrere Producer-Instanzen parallel arbeiten sollen müssen einige Dinge beachtet werden:
-Jedes Abo muss GENAU EINER Instanz zugeordnet werden
-Fällt eine Instanz aus müssen die anderen Instanzen deren Abos übernehmen
-Existiert ein Abo bereits in einer Instanz darf keine weitere Instanz ein identisches Abo bearbeiten, da sonst die tweets mehrfach in ihrem Kafka-Topic vorliegen. (möchte ein neuer Nutzer die selben tweets beobachten soll er das bestehende Abo mit nutzen)
-Wenn sich kein aktiver Nutzer mehr für einen bestimmtes Abo interessiert soll das Abo (also der Producer-Thread) (nach einer gewissen Zeit) entfernt werden. Gerade wenn mehrere Nutzer ein Abo teilen muss sichergestellt werden, dass der Thread erst beendet wird, wenn DER LETZTE NUTZER der Abos sich nicht mehr dafür Interessiert.
-
-Die Realtime-Streaming-API von Twitter liefert nur neu erstellte Tweets. Ein Nutzer der einen bestimmten Hashtag analysiert müsste also warten, bis neue Tweets zu diesem Hashtag erstellt werden. Allerdings bietet Twitter eine weitere API um (bis zu 7 Tage) alte Tweets abzurufen. Beide APIs werden kombiniert benutzt um sowohl bestehende als auch neue Tweets zu erhalten.
-Wird ein Producer-Thread gestartet muss dieser prüfen ob und bis zu welchem Zeitpunkt bereits Tweets zu diesem Filterkriterium in Kafka vorhanden sind und nachfolgend nur neuere historische Tweets von der Twitter-API laden. Parallel dazu startet er mit dem Streaming neuer Tweets zu seinem Hashtag.
+**Da mehrere Producer-Instanzen parallel arbeiten sollen müssen einige Dinge beachtet werden:**
+Jedes Abo muss GENAU EINER Instanz zugeordnet werden  
+Fällt eine Instanz aus müssen die anderen Instanzen deren Abos übernehmen  
+Existiert ein Abo bereits in einer Instanz darf keine weitere Instanz ein identisches Abo bearbeiten, da sonst die tweets mehrfach in ihrem Kafka-Topic vorliegen. (möchte ein neuer Nutzer die selben tweets beobachten soll er das bestehende Abo mit nutzen)  
+Wenn sich kein aktiver Nutzer mehr für einen bestimmtes Abo interessiert soll das Abo (also der Producer-Thread) (nach einer gewissen Zeit) entfernt werden. Gerade wenn mehrere Nutzer ein Abo teilen muss sichergestellt werden, dass der Thread erst beendet wird, wenn DER LETZTE NUTZER der Abos sich nicht mehr dafür Interessiert.  
 
 ### **Überganslösung Producerverwaltung**
 Da die Organisation von mehreren unabhängigen Producer-Instanzen mit einigem Aufwand verbunden ist, wird vorerst mit einem einzelnen Producer gearbeitet. Dadurch reduziert sich der Verwaltungsaufwand erheblich. Außerdem wird der Producer in den Webserver integriert, wodurch die Kommunikation zwischen Producer und Webapp bequem mittels Java passieren kann (kein IPC, Kafka, Zookeeper o.ä. nötig).
 
+## ** Twitter-API** 
+Die Realtime-Streaming-API von Twitter liefert nur neu erstellte Tweets. Ein Nutzer der einen bestimmten Hashtag analysiert müsste also warten, bis neue Tweets zu diesem Hashtag erstellt werden. Allerdings bietet Twitter eine weitere API um (bis zu 7 Tage) alte Tweets abzurufen. Beide APIs werden kombiniert benutzt um sowohl bestehende als auch neue Tweets zu erhalten.
+Wird ein Producer-Thread gestartet muss dieser prüfen ob und bis zu welchem Zeitpunkt bereits Tweets zu diesem Filterkriterium in Kafka vorhanden sind und nachfolgend nur neuere historische Tweets von der Twitter-API laden. Parallel dazu startet er mit dem Streaming neuer Tweets zu seinem Hashtag.
+
+
+## ** Apacha Kafka ** 
+
 ### **Topic-Struktur**
-Wie erwähnt werden nicht alle Tweets in einem einzelnen Topic gespeichert, sondern anhand der Filterkriterien (im einfachsten Fall der Hashtag über den sie abgerufen wurden) auf mehrere Topics verteilt.
 
-Das Topic wird aus dem Query erzeugt un hat das folgende Format:
-
-UNI_tweets_hashtag_mentioneduser
-
-UNI = Prefix für alle Topics des Projektes
-tweets = präfix für alle topics die tweets enthalten
-hashtag = Der Hashtag des Queries
-mentioneduser = Der Nutzername nach dem die Tweets gefiltert wurden
-
-Kommt eine Komponente nicht im Query vor, wird sie als leerer String betrachtet, die Trennzeichen müssen dennoch vorkommen.  
-Beispiel ohne mentioneduser: UNI_tweets_hashtag__
-
-Enthält eine Komponente mehrere Teile (z.b. bei filterung nach mehreren Hashtags) werden diese durch Punkte (".") getrennt. Einzelne Komponenten sind (sofern sinnvoll) alphabetisch zu sortieren.  
-
-In Zukunft können weitere Filterkriterien (z.b. geokoordinaten) ergänzt werden.
-
+Der Apacha Kafka enthält nur ein Topic: "tweets"
 
 ## **Analyzer**
-Der Analyzer liest die Tweets die der Producer in die verschiedenen Topics geschrieben hat und führt eine Sentiment-Analyse darauf aus.
-Der Tweet (erweitert um das Ergebnis der Analyse) wird anschließend wieder (in ein neues topic) in Kafka gespeichert. Die ursprünglliche Zuordnung der Tweets zu unterschiedlichen Topics muss dabei natürlich erhalten bleiben.
-
-Das topic der verarbeiteten tweets entspricht nahezu dem der rohtweets, allerdings wird das prefix "UNI_tweets_" durch "UNI_analyzed-tweets_" ersetzt.
+Der Analyzer liest die Tweets die der Producer in den Kafka geschrieben hat und führt eine Sentiment-Analyse darauf aus.
+Der Tweet (erweitert um das Ergebnis der Analyse) wird anschließend in die MongoDB gespeichert. 
 
 Sollte sich herausstellen das die Sentiment-Analyse ein Performance-Engpass ist, da Tweets stellenweise mehrfach analysiert werden (z.B. da sie mehrere Hashtags enthalten und somit mehreren verschiedenen Filterkriterien entsprechen) könnte man einen Cache-Server (Memcached, Redis) hinzuziehen.
 
-Der Analyzer ist ein eigenständiges Python-Programm und kommuniziert mit den restlichen Komponenten ausschließlich über Kafka.
-
 ## **Webapp**
 Die Webapp besteht aus zwei Komponenten, Backend und Frontend.
-Das Backend liest die fertig analysierten Tweets aus Kafka (die zu dem jeweiligen Nutzer gehören) und übermittelt sie an das Frontend, welches sie dem Nutzer anzeigt. Außerdem ermöglicht das Frontend dem Nutzer anzugeben welche Tweets er analysieren möchte. Diese Analyseanfrage wird an das Backend übermittelt, welches diese Anfrage letztendlich an die Producer übermittelt.
+Das Backend liest die fertig analysierten Tweets aus MongoDB (die zu dem jeweiligen Nutzer gehören) und übermittelt sie an das Frontend, welches sie dem Nutzer anzeigt. Außerdem ermöglicht das Frontend dem Nutzer anzugeben welche Tweets er analysieren möchte. Diese Analyseanfrage wird an das Backend übermittelt, welches diese Anfrage letztendlich an die Producer übermittelt.
 
 ### **Frontend**
 Das Frontend bietet dem Nutzer die Möglichkeit Queries an das Backend zu schicken und zeigt die Ergebnisse der Querries auf mehrere Arten an:  
@@ -70,7 +56,6 @@ Das Frontend bietet dem Nutzer die Möglichkeit Queries an das Backend zu schick
 
 ### **Backend**
 Das Backend stellt APIs zur Verfügung die jeweils ein Query entgegennehmen und Ergebnisse zurückgeben.
-Für jedes Frontendelement (Tweetliste, Graph etc.) existiert ein eigener API-Endpunkt der die Ergebnisse in einer für das Frontenelement geeigneten Art zurückgibt.
 
 Wenn ein eingehender API-Aufruf erfordert, dass ein neuer Producer gestartet wird (da zu dem angefragten Query noch kein PRoducer aktiv ist), so sorgt das Backend dafür das ein entsprechender Producer gestartet wird.
 
