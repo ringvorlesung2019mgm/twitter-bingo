@@ -38,14 +38,19 @@ tweetApp.controller('tweetStream', function ($scope) {
 	function openTweetStreamConnection(hashtag) {
 
 		var last_index = 0;
-		var xhr = new XMLHttpRequest()
-		xhr.open("POST", "http://localhost:8080/producer/api/TweetStream?q=" + encodeURIComponent(hashtag), true)
-		xhr.setRequestHeader('Content-type', 'application/json; charset=UTF-8')
-		xhr.send()
-		xhr.onprogress = function () {
-			var curr_index = xhr.responseText.length;
+
+        //if there is already a stream-request running abort it, before replacing it with a new one
+		if ($scope.streamRequest != null){
+		    $scope.streamRequest.abort()
+		}
+
+		$scope.streamRequest = new XMLHttpRequest()
+		$scope.streamRequest.open("POST", "http://localhost:8080/producer/api/TweetStream?q=" + encodeURIComponent(hashtag), true)
+		$scope.streamRequest.setRequestHeader('Content-type', 'application/json; charset=UTF-8')
+		$scope.streamRequest.onprogress = function () {
+			var curr_index = $scope.streamRequest.responseText.length;
 			if (last_index == curr_index) return;
-			var s = xhr.responseText.substring(last_index, curr_index);
+			var s = $scope.streamRequest.responseText.substring(last_index, curr_index);
 			last_index = curr_index;
 			ms = s.split("\r\n");
 			for (i = 0; i < ms.length; i++) {
@@ -76,8 +81,8 @@ tweetApp.controller('tweetStream', function ($scope) {
 
 						// 
 					}
-					var loggingobj = [sumRating, tweetCount, averageRating, lowestRatedTweet, highestRatedTweet, differanceSpan];
-					console.log(loggingobj);
+					//var loggingobj = [sumRating, tweetCount, averageRating, lowestRatedTweet, highestRatedTweet, differanceSpan];
+					//console.log(loggingobj);
 					var rankingDecimal = s.rating.toFixed(1);
 					var tweetText = s.text;
 					var tweetAuthor = "- " + s.userName;
@@ -90,11 +95,11 @@ tweetApp.controller('tweetStream', function ($scope) {
 					$scope.tweetArray.push(tweetObject);
 
 					$scope.$apply();
-					//$("#content").append("<blockquote class=\"twitter-tweet\"><p dir=\"ltr\">" + s.text + "</p></blockquote><div class=\"sentiment-number\">"+ rating +"</div>")
 					console.log("POST /api/TweetStream Tweet received");
 				}
 			}
 			// console.log(s)
 		}
+		$scope.streamRequest.send()
 	}
 });
