@@ -23,9 +23,9 @@ var lowRatedTweets = [];
 var highRatedTweet = []
 
 //TweetStream
-var tweetApp = angular.module('tweetApp', []);
+var tweetApp = angular.module('tweetApp', ['ngAnimate']);
 
-tweetApp.controller('tweetStream', function ($scope) {
+angular.module('tweetApp').controller('tweetStream', function ($scope) {
 	$scope.hashtag = '';
 	$scope.state = "IDLE"
 
@@ -101,17 +101,30 @@ tweetApp.controller('tweetStream', function ($scope) {
 					var tweetAuthor = "- " + s.userName;
 
 					var tweetObject = {
+					    id: s.id['$numberLong'],
 						text: tweetText,
 						ranking: rankingDecimal,
 						author: tweetAuthor,
 					};
-					$scope.tweetArray.push(tweetObject);
+					$scope.tweetArray.unshift(tweetObject);
 
-					$scope.$apply();
 					console.log("POST /api/TweetStream Tweet received");
 				}
 			}
-			// console.log(s)
+
+			// Apply the changes to the UI only after all tweets of the current batch have been processed
+            			// Otherwise (when refreshing after every element) we would get a huge performance-problem
+
+            //referencing the window by id seems a bit dirty here, but for the moment it will do fine
+			tweetlist = document.getElementById("tweetwindow")
+			oldscrolltop = tweetlist.scrollTop
+			oldscrollbottom = tweetlist.scrollHeight - tweetlist.scrollTop
+			$scope.$apply();
+			// If the user had scrolled before we updated the list bring him back to the point he was watching
+			if (oldscrolltop > 100){
+			    tweetlist.scrollTop = tweetlist.scrollHeight - oldscrollbottom
+			}
+
 		}
 		$scope.streamRequest.send()
 	}

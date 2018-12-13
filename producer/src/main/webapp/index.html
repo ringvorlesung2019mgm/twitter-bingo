@@ -2,16 +2,15 @@
 <html>
 
 <head>
-    <meta charset="utf-8" />
+    <meta charset="utf-8"/>
     <title>Twitter Bingo</title>
     <script
             src="https://code.jquery.com/jquery-3.3.1.js"
             integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
             crossorigin="anonymous">
     </script>
-    <script
-            src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js">
-    </script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular-animate.js"></script>
     <script src="twitterBingo.js" charset="utf-8" defer>
     </script>
     <link href="design.css" rel="stylesheet">
@@ -35,7 +34,7 @@
     </div>
 
     <!-- Tweet-Window -->
-    <div class="tweet-window">
+    <div id="tweetwindow" class="tweet-window">
         <div id="content">
             <!-- Loading-indicator -->
             <div ng-hide="state !== 'WAITING'" class="spinner">
@@ -46,12 +45,12 @@
                 <div class="rect5"></div>
             </div>
             <!--loaded Tweets-->
-            <div ng-repeat="x in tweetArray track by $index">
-            <blockquote class="twitter-tweet">
-                <p id='tweets' dir="ltr">{{x.text}}</p>
-                {{x.author}}
-            </blockquote>
-            <div class="sentiment-number"> {{x.ranking}}</div>
+            <div class="list-item" ng-repeat="x in tweetArray track by x.id">
+                    <blockquote class="twitter-tweet">
+                        <p id='tweets' dir="ltr">{{x.text}}</p>
+                        {{x.author}}
+                    </blockquote>
+                    <div class="sentiment-number"> {{x.ranking}}</div>
             </div>
         </div>
     </div>
