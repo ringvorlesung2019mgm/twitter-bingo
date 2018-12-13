@@ -27,11 +27,18 @@ var tweetApp = angular.module('tweetApp', []);
 
 tweetApp.controller('tweetStream', function ($scope) {
 	$scope.hashtag = '';
+	$scope.state = "IDLE"
 
 	$scope.loadHashtag = function () {
-		$scope.tweetArray = [];
-		var baseUrl = "http://localhost:8080/producer/api/"
-		openTweetStreamConnection($scope.hashtag);
+	    if ($scope.hashtag !== "" && $scope.hashtag !== null){
+            openTweetStreamConnection($scope.hashtag);
+		}else{
+		    $scope.tweetArray = [];
+		    $scope.state = "IDLE"
+		    if ($scope.streamRequest != null){
+                $scope.streamRequest.abort()
+            }
+		}
 	};
 
 	// based on https://stackoverflow.com/questions/33635919/xmlhttprequest-chunked-response-only-read-last-response-in-progress
@@ -44,10 +51,16 @@ tweetApp.controller('tweetStream', function ($scope) {
 		    $scope.streamRequest.abort()
 		}
 
+        $scope.tweetArray = [];
+        $scope.state = "WAITING"
+
 		$scope.streamRequest = new XMLHttpRequest()
-		$scope.streamRequest.open("POST", "http://localhost:8080/producer/api/TweetStream?q=" + encodeURIComponent(hashtag), true)
+		$scope.streamRequest.open("POST", "api/TweetStream?q=" + encodeURIComponent(hashtag), true)
 		$scope.streamRequest.setRequestHeader('Content-type', 'application/json; charset=UTF-8')
 		$scope.streamRequest.onprogress = function () {
+
+		    $scope.state = "STREAMING"
+
 			var curr_index = $scope.streamRequest.responseText.length;
 			if (last_index == curr_index) return;
 			var s = $scope.streamRequest.responseText.substring(last_index, curr_index);
