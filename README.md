@@ -35,12 +35,18 @@ This will start one producer/webserver, one analyzer one kafka and one mongodb-s
 
 ## Running/Testing outside of docker-containers
 
+### The easy way
+Modify your /etc/hosts file in a way the domains "kafka" and "mongodb" point to 127.0.0.1 . This way the conection to kafka and mongdb works the same way, no matter if the suftware runs inside or outside of docker.
+
+### I don't want to modify my /etc/hosts 
+Ok, then just do the following:  
+
 - In the docker-compose.yml replace ```KAFKA_ADVERTISED_HOST_NAME: kafka``` with ```KAFKA_ADVERTISED_HOST_NAME: 127.0.0.1```
 
 - Start mongodb and kafka
 
 ```
-sudo docker-comppose build
+sudo docker-compose build
 sudo docker-compose up kafka mongodb
 ```
 - Insert the following lines in your config:

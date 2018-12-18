@@ -3,14 +3,16 @@ language: java
 jdk:
   - openjdk8
 
+addons:
+  hosts:
+    - kafka
+    - mongodb
+
 services:
   - docker
 
 before_install:
   - echo "$CONFIG_FILE" | base64 -d >> config.properties
-  - mkdir certificates
-  - echo "$KEYSTORE" | base64 -d > certificates/kafka.client.keystore.jks
-  - echo "$TRUSTSTORE" | base64 -d > certificates/kafka.client.truststore.jks
 
 matrix:
   include:
@@ -18,7 +20,7 @@ matrix:
     install: 
       - cd producer && ./gradlew assemble
       - docker-compose build mongodb
-      - docker-compose up -d mongodb
+      - docker-compose up -d mongodb kafka
       - sleep 5
     script: ./gradlew check
   - name: "Test python"
@@ -27,7 +29,7 @@ matrix:
     install: 
       - cd analyzer && pip3 install -r requirements.txt
       - docker-compose build mongodb
-      - docker-compose up -d mongodb
+      - docker-compose up -d mongodb kafka
       - sleep 5
     script: pytest
   - name: "Test docker-build"
