@@ -27,12 +27,12 @@ Wenn sich kein aktiver Nutzer mehr für einen bestimmtes Abo interessiert soll d
 ### **Überganslösung Producerverwaltung**
 Da die Organisation von mehreren unabhängigen Producer-Instanzen mit einigem Aufwand verbunden ist, wird vorerst mit einem einzelnen Producer gearbeitet. Dadurch reduziert sich der Verwaltungsaufwand erheblich. Außerdem wird der Producer in den Webserver integriert, wodurch die Kommunikation zwischen Producer und Webapp bequem mittels Java passieren kann (kein IPC, Kafka, Zookeeper o.ä. nötig).
 
-## ** Twitter-API** 
+## **Twitter-API** 
 Die Realtime-Streaming-API von Twitter liefert nur neu erstellte Tweets. Ein Nutzer der einen bestimmten Hashtag analysiert müsste also warten, bis neue Tweets zu diesem Hashtag erstellt werden. Allerdings bietet Twitter eine weitere API um (bis zu 7 Tage) alte Tweets abzurufen. Beide APIs werden kombiniert benutzt um sowohl bestehende als auch neue Tweets zu erhalten.
-Wird ein Producer-Thread gestartet muss dieser prüfen ob und bis zu welchem Zeitpunkt bereits Tweets zu diesem Filterkriterium in Kafka vorhanden sind und nachfolgend nur neuere historische Tweets von der Twitter-API laden. Parallel dazu startet er mit dem Streaming neuer Tweets zu seinem Hashtag.
+~~Wird ein Producer-Thread gestartet muss dieser prüfen ob und bis zu welchem Zeitpunkt bereits Tweets zu diesem Filterkriterium in Kafka vorhanden sind und nachfolgend nur neuere historische Tweets von der Twitter-API laden.~~ Es ist egal ob bestimmte tweets doppelt in den Kafka gelangen, da beim Einfügen in die MongoDB sichergestellt wird, dass jeder Tweet nur einmal in der Datenbank enthalten ist. Beim Starten ruft der Producer die historischen Tweets ab und startet danach mit dem Streaming neuer Tweets zu seinem Hashtag.
 
 
-## ** Apacha Kafka ** 
+## **Apacha Kafka** 
 
 ### **Topic-Struktur**
 
@@ -42,7 +42,11 @@ Der Apacha Kafka enthält nur ein Topic: "tweets"
 Der Analyzer liest die Tweets die der Producer in den Kafka geschrieben hat und führt eine Sentiment-Analyse darauf aus.
 Der Tweet (erweitert um das Ergebnis der Analyse) wird anschließend in die MongoDB gespeichert. 
 
-Sollte sich herausstellen das die Sentiment-Analyse ein Performance-Engpass ist, da Tweets stellenweise mehrfach analysiert werden (z.B. da sie mehrere Hashtags enthalten und somit mehreren verschiedenen Filterkriterien entsprechen) könnte man einen Cache-Server (Memcached, Redis) hinzuziehen.
+Sollte sich herausstellen das die Sentiment-Analyse ein Performance-Engpass ist, da Tweets stellenweise mehrfach analysiert werden (z.B. da sie mehrere Hashtags enthalten und somit mehreren verschiedenen Filterkriterien entsprechen) könnte man überlegen vor der Analyse in der Datenbank zu prüfen ob dieser Tweet bereits einmal analysiert wurde.
+
+## **MongoDB**
+Analysierte tweets werden in einer MongoDB gespeichert. Standardmäßig befinden sich die analysierten Tweets in der Datenbank "twitter" und der collection "tweets". Der Analyzer stellt sicher, dass diverse Indexe auf den für Analysen relevanten Feldern der Tweets existieren (zurzeit unique index für id, index für hashtags und zeiträume). Weitere indexe können hinzugefügt werden, sobald die Webapp Suchanfragen auf diesen Attributen ermöglicht.  
+Das Webapp-Backend ließt existierende Tweets zu eingehenden Suchanfragen mittels eines "normalen" queries. Neue (nach beginn des API-Requests eingehende) Tweets (die den Filterkriterien des Queries entsprechen) werden mittels MongoDB change streams in Echtzeit von der Datenbank and die webapp übermittelt. Um change streams nutzen zu können muss die MongoDB als replica-set laufen, wobei allerdings für Entwicklungs- und Testzwecke auch eine einzelne Instanz ausreicht.
 
 ## **Webapp**
 Die Webapp besteht aus zwei Komponenten, Backend und Frontend.
@@ -59,6 +63,8 @@ Das Backend stellt APIs zur Verfügung die jeweils ein Query entgegennehmen und 
 
 Wenn ein eingehender API-Aufruf erfordert, dass ein neuer Producer gestartet wird (da zu dem angefragten Query noch kein PRoducer aktiv ist), so sorgt das Backend dafür das ein entsprechender Producer gestartet wird.
 
+Der einzige bisher vorgesehene API-Endpunkt ist /api/TweetStream. Andere Endpunkte (z.B. um Analyseergebnisse anbzufragen) sind derzeit nicht nötig, da sämtliche Analysen im Frontend erfolgen.
+
 # Implementierungsdetails
 
 ## **Kommuniktation Frontend-Backend**
@@ -68,8 +74,8 @@ Dafür werden  HTTP/1.1 chunked responses verwendet.
 ## **Lebenszeit von Producer-Threads**
 Jeder Producer-Thread liefet Daten für einen oder mehrere aktive Nutzer. Sobald es 5 Minuten lang keinen aktiven Nutzer zu einem Producer-Thread mehr gibt wird dieser beendet.
 
-## **Zuordnung von Nutzern**
-Damit Queries und deren Ergebnisse ihrem jeweiligen Nutzer zugeordnet werden können, müssen die Nutzer identifizierbar sein. Daher erhält jeder User eine zufällige aber eindeutige SessionID. Diese wird in einem Cookie gespeichert und muss bei jedem API-Aufruf mitgegeben werden.
+## **Zuordnung von Queries zu Nutzern**
+Nutzer werden nicht "wirklich" getrackt. Ein user existiert für die API nur für die Dauer eines API-Zugriffs (welche im Falle von Stream-APIs aber durchaus längere Zeit dauern können). Queries sind dem API-Request zugeordnet mit dem sie ausgeführt werden. Wird der Request beendet wird der "Nutzer" aus den aktiven Nutzern des Queries entfernt.
 
 ## **Zuordnung von Abos zu Producern**
 ZURZEIT NOCH NICHT RELEVANT.  
