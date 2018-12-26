@@ -1,10 +1,67 @@
 ## Anforderungsdefinition
 
+#### Vorgaben 
+
+Quelle: https://www.informatik.uni-leipzig.de/ifi/en/kooperation/it-ringvorlesung/wintersemester-2018/
+
+##### Problemstellung 
+
+Auf Twitter werden im Rahmen von Großereignissen zahlreiche Tweets innerhalb kürzester Zeit abgesetzt. In diesem Projekt sollen diese Tweets automatisch auf Basis von Hashtags oder referenzierten Accounts gefiltert und in Echtzeit auf ihre Stimmung analysiert werden (Sentiment Analysis). Die erhaltenen Ergebnisse sollen auf einem Dashboard statistisch und auf Basis konkreter Beispiele visualisiert werden.
+
+Zur Umsetzung dieser Anforderung sollen mehrere Microservices unter Verwendung von Apache Kafka als verteiltes Transaktionslog skalierbar umgesetzt werden. 
+
+##### Bereitgestellte Bestandteile
+
+Den Studenten wird durch mgm ein aus dem Internet erreichbarer Server bereitgestellt, auf dem Tweets in einer Kafka-Instanz zwischengespeichert und die Verarbeitungsprogramme / Services ausgeführt werden können.
+
+Außerdem wird ein Python-Skript vorgegeben, das auf Basis eines vorhandenen Modells jedem Tweet einen Stimmungswert zwischen -1,0 und +1,0 zuordnet, sodass im Rahmen des Projektes kein Modell trainiert oder Logik zur Stimmungsanalyse implementiert werden muss. 
+
+##### Grundausbaustufe
+
+Es sollen Services umgesetzt werden, welche die folgende Funktionalität bereitstellen:
+
+* Die Daten über die offizielle Twitter API abrufen und filtern
+* Die Tweets mithilfe eines vorgegebenen Python-Skripts auf ihre Stimmung analysieren
+
+Mithilfe dieser Services soll ein Programm implementiert werden, das beim Aufruf die Ergebnisse für die letzten 100 Tweets als Graph visualisiert. Dabei soll für jeden Tweet der Zeitpunkt des Tweets und das Ergebnis der Stimmungsanalyse dargestellt werden. 
+
+##### Erweiterungsmöglichkeiten
+
+Diese Möglichkeiten dienen, soweit verstanden, lediglich als Ansatzpunkte für weitere Ausbaustufen.
+
+1) Echtzeit-Dashboard
+
+Zusätzlich zur statischen Analyse soll ein Web-Dashboard erstellt werden, das sich selbständig aktualisiert.
+
+Auf dem Dashboard sollen die letzten 10 Tweets angezeigt werden. Diese sollen auf Basis von Schwellwerten basierend auf dem Ergebnis der Stimmungsanalyse als positiv, neutral oder negativ markiert werden.
+
+2) Sliding Window Analysen
+
+Es soll zusätzlich ein Service umgesetzt werden, der fortlaufend statistische Daten mittels Sliding-Window-Analysen auf den klassifizierten Tweets berechnet.
+
+Das Dashboard soll auf Basis dieser Daten um folgende Elemente erweitert werden:
+
+* Eine Ampel, die anzeigt, ob die Tweets der letzten 10 Minuten mehr als 70% positiv oder negativ waren.
+* Der Verlauf der Stimmung der letzten beiden Stunden in Abständen von 10 Minuten.
+
+3) Signifikante Beispiele
+
+Es soll zusätzlich ein Service umgesetzt werden, der auf Basis von Schwellwerten und sensiblen Wörtern besonders signifikante Tweets als Beispiele bereitstellt.
+
+Das Dashboard soll auf Basis dessen zusätzlich die jeweils 5 signifikantesten Beispiele für positive und negative Tweets der letzten halben Stunde anzeigen.
+
+##### Technologie Stack
+
+* Java, Python, Git, Gradle
+* Apache Kafka, Kafka Streams
+* Spring Boot, Angular JS
+
 #### Userstory
 
 * Als Nutzer möchte ich gerne wissen wie die Meinung zu den Freitags und Samstags-konzerten eines Festival ist, denn ich habe eine Tageskarte für Sonntag.
-* Dafür betrete ich die Webseite, gebe dort den offiziellen HashTag des Festivals an.
-Prototyp-Story:
+* Dafür betrete ich die Webseite, gebe dort den offiziellen HashTag des Festivals an.   
+
+##### Prototyp-Story:
 * Ich bekomme eine Liste der Tweets inkl. Stimmungsanalyse (als eingefärbte Zahl), die sich aktualisiert. Die Tweets der letzten sieben Tage sind enthalten.
 Ausbau-Story: 
 * Danach bekomme ich eine Grafik anzeigt.
