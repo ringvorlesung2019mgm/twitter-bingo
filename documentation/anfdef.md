@@ -119,6 +119,8 @@ Der Apache Kafka des Kunden soll als „Datenbank“ des Projekts genutzt werden
 | F2-1 | Die Anzahl der analysierten Tweets wird dargestellt. | - |  Muss |
 | F2-1-1 | Die Anzahl der positiv/negativ bewerteten Tweets wird dargestellt. | - |  Soll |
 | F2-2 | Die annotierten Tweets werden in einer Liste dargestellt. | - |  Muss |
+| F2-2-1 | Zu einem annotierten Tweets wird der Author des Tweets angezeigt. | - |  Muss |
+| F2-2-2 | Zu einem annotierten Tweets wird der Zeitpunkt des Tweets angezeigt. | - |  Muss |
 | F2-3 | Das durchschnittliche Sentiment wird als Zahlenwert dargestellt. | - |  Muss |
 | F2-4 | Die Highlight-Tweets (best-/schlechtbewertester Tweet) werden dargestellt.  | - |  Soll |
 | F2-5 | Die Bewertungen der Tweets wird als Graph über den gewünschten Zeitraum dargestellt.  | - | Soll |
