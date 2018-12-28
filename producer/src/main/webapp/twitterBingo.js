@@ -30,6 +30,7 @@ angular.module('tweetApp').controller('tweetStream', function ($scope) {
 	$scope.state = "IDLE"
 
 	$scope.loadHashtag = function () {
+	    document.getElementById("tweetwindow").style.visibility = "visible";
 		if ($scope.hashtag !== "" && $scope.hashtag !== null) {
 			openTweetStreamConnection($scope.hashtag);
 		} else {
@@ -45,13 +46,13 @@ angular.module('tweetApp').controller('tweetStream', function ($scope) {
 	function openTweetStreamConnection(hashtag) {
 
 		var last_index = 0;
-
 		//if there is already a stream-request running abort it, before replacing it with a new one
 		if ($scope.streamRequest != null) {
 			$scope.streamRequest.abort()
 		}
 
 		$scope.tweetArray = [];
+		chartArray = [];
 		$scope.state = "WAITING"
 
 		$scope.streamRequest = new XMLHttpRequest()
@@ -108,6 +109,12 @@ angular.module('tweetApp').controller('tweetStream', function ($scope) {
 						createdAt: new Date(s.createdAt["$date"])
 					};
 					$scope.tweetArray.unshift(tweetObject);
+					var chartObject = {
+					    x: new Date(s.createdAt["$date"]),
+					    y: rankingDecimal*10
+					}
+
+                    chartArray.push(chartObject);
 
 					console.log("POST /api/TweetStream Tweet received");
 				}
@@ -125,8 +132,36 @@ angular.module('tweetApp').controller('tweetStream', function ($scope) {
 			if (oldscrolltop > 100) {
 				tweetlist.scrollTop = tweetlist.scrollHeight - oldscrollbottom
 			}
+			loadChart(chartArray);
 
 		}
 		$scope.streamRequest.send()
 	}
+
+	function loadChart(chartArray) {
+    var chart = new CanvasJS.Chart("chartContainer", {
+    	animationEnabled: true,
+    	theme: "light2",
+    	title:{
+    		text: "Time Analysis"
+
+    	},
+    	axisY:{
+			labelFormatter: function(e){
+				return e.value/10;
+			},
+			stripLines: [{value:0}]
+    	},
+    	axisX:{
+    	    title: "Time"
+    	},
+    	data: [{
+    		type: "line",
+    		xValueType: "dateTime",
+            xValueFormatString: "DD MMM hh:mm TT",
+    		dataPoints: chartArray
+    	}]
+    });
+    chart.render();
+    }
 });

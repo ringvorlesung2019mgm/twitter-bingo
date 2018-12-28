@@ -9,8 +9,8 @@
         </script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular-animate.js"></script>
-    <script src="twitterBingo.js" charset="utf-8" defer>
-    </script>
+    <script src="twitterBingo.js" charset="utf-8" defer></script>
+    <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
     <link href="design.css" rel="stylesheet">
 </head>
 
@@ -18,7 +18,7 @@
     <div ng-app="tweetApp" ng-controller="tweetStream">
         <!-- Headline -->
         <div>
-            <h1>Twitter-Bingo</h1>
+            <h1>Twitter-Bingo1</h1>
         </div>
 
         <!-- Hashtag-Input -->
@@ -30,6 +30,8 @@
                 </form>
             </p>
         </div>
+        <!-- Diagram -->
+        <div id="chartContainer" style="height: 300px; width: 100%;"></div>
 
         <!-- Tweet-Window -->
         <div id="tweetwindow" class="tweet-window">
@@ -47,7 +49,7 @@
                     <blockquote class="twitter-tweet">
                         <p id='tweets' dir="ltr">{{x.text}}</p>
                         {{x.author}}
-                        <div class="date"> {{x.createdAt.toLocaleString()}}</div>
+                        <a class="date"> {{x.createdAt.toLocaleString()}}</a>
                     </blockquote>
                     <div class="sentiment-number" ng-class="{positive: x.ranking > 0, negative: x.ranking < 0}">
                         {{x.ranking}}</div>
