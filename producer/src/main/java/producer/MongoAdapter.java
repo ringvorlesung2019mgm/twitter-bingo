@@ -11,6 +11,8 @@ import org.bson.Document;
 
 import java.util.Iterator;
 
+import static com.mongodb.client.model.Sorts.*;
+
 
 /**
  * Streams tweets for a given query from mongodb.
@@ -41,6 +43,7 @@ public class MongoAdapter {
     public ResultCursor stream(Query q,String db, String collection){
         MongoCollection coll = client.getDatabase(db).getCollection(collection);
         FindIterable existing = coll.find(q.getMongodbQuery());
+        existing = existing.sort(orderBy(ascending("createdAt")));
 
         ChangeStreamIterable incoming = coll.watch(q.getMongodbChangestreamFilter());
 
