@@ -53,20 +53,27 @@ div {
 }
 
 .sentiment-number {
-	style ="float: right";
 	margin: 0px;
 	padding: 12px 16px 10px 16px;
 	margin: 10px 0px 0px 4px;
 	float: left;
+	background-color:darkgray;
+	display: flex;
+	justify-content:center;
+	align-content:center;
+	flex-direction:column;
+	border-radius:50%;
+	color:white;
+	font-weight: bold;
+	width: 9px;
+}
+
+.sentiment-number.positive {
 	background-color:green;
-    display: flex;
-    justify-content:center;
-    align-content:center;
-    flex-direction:column;
-    border-radius:50%;
-    color:white;
-    font-weight: bold;
-    width: 9px;
+}
+
+.sentiment-number.negative {
+	background-color:red;
 }
 
 .tweet-window {
