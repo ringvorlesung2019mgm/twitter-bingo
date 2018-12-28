@@ -47,6 +47,7 @@
                     <blockquote class="twitter-tweet">
                         <p id='tweets' dir="ltr">{{x.text}}</p>
                         {{x.author}}
+                        <div class="date"> {{x.createdAt.toLocaleString()}}</div>
                     </blockquote>
                     <div class="sentiment-number" ng-class="{positive: x.ranking > 0, negative: x.ranking < 0}">
                         {{x.ranking}}</div>

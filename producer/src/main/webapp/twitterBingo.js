@@ -30,14 +30,14 @@ angular.module('tweetApp').controller('tweetStream', function ($scope) {
 	$scope.state = "IDLE"
 
 	$scope.loadHashtag = function () {
-	    if ($scope.hashtag !== "" && $scope.hashtag !== null){
-            openTweetStreamConnection($scope.hashtag);
-		}else{
-		    $scope.tweetArray = [];
-		    $scope.state = "IDLE"
-		    if ($scope.streamRequest != null){
-                $scope.streamRequest.abort()
-            }
+		if ($scope.hashtag !== "" && $scope.hashtag !== null) {
+			openTweetStreamConnection($scope.hashtag);
+		} else {
+			$scope.tweetArray = [];
+			$scope.state = "IDLE"
+			if ($scope.streamRequest != null) {
+				$scope.streamRequest.abort()
+			}
 		}
 	};
 
@@ -46,20 +46,20 @@ angular.module('tweetApp').controller('tweetStream', function ($scope) {
 
 		var last_index = 0;
 
-        //if there is already a stream-request running abort it, before replacing it with a new one
-		if ($scope.streamRequest != null){
-		    $scope.streamRequest.abort()
+		//if there is already a stream-request running abort it, before replacing it with a new one
+		if ($scope.streamRequest != null) {
+			$scope.streamRequest.abort()
 		}
 
-        $scope.tweetArray = [];
-        $scope.state = "WAITING"
+		$scope.tweetArray = [];
+		$scope.state = "WAITING"
 
 		$scope.streamRequest = new XMLHttpRequest()
 		$scope.streamRequest.open("POST", "api/TweetStream?q=" + encodeURIComponent(hashtag), true)
 		$scope.streamRequest.setRequestHeader('Content-type', 'application/json; charset=UTF-8')
 		$scope.streamRequest.onprogress = function () {
 
-		    $scope.state = "STREAMING"
+			$scope.state = "STREAMING"
 
 			var curr_index = $scope.streamRequest.responseText.length;
 			if (last_index == curr_index) return;
@@ -101,10 +101,11 @@ angular.module('tweetApp').controller('tweetStream', function ($scope) {
 					var tweetAuthor = "- " + s.userName;
 
 					var tweetObject = {
-					    id: s.id['$numberLong'],
+						id: s.id['$numberLong'],
 						text: tweetText,
 						ranking: rankingDecimal,
 						author: tweetAuthor,
+						createdAt: new Date(s.createdAt["$date"])
 					};
 					$scope.tweetArray.unshift(tweetObject);
 
@@ -113,16 +114,16 @@ angular.module('tweetApp').controller('tweetStream', function ($scope) {
 			}
 
 			// Apply the changes to the UI only after all tweets of the current batch have been processed
-            			// Otherwise (when refreshing after every element) we would get a huge performance-problem
+			// Otherwise (when refreshing after every element) we would get a huge performance-problem
 
-            //referencing the window by id seems a bit dirty here, but for the moment it will do fine
+			//referencing the window by id seems a bit dirty here, but for the moment it will do fine
 			tweetlist = document.getElementById("tweetwindow")
 			oldscrolltop = tweetlist.scrollTop
 			oldscrollbottom = tweetlist.scrollHeight - tweetlist.scrollTop
 			$scope.$apply();
 			// If the user had scrolled before we updated the list bring him back to the point he was watching
-			if (oldscrolltop > 100){
-			    tweetlist.scrollTop = tweetlist.scrollHeight - oldscrollbottom
+			if (oldscrolltop > 100) {
+				tweetlist.scrollTop = tweetlist.scrollHeight - oldscrollbottom
 			}
 
 		}

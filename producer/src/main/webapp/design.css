@@ -35,6 +35,10 @@ div {
 	background-color: inherit;
 }
 
+.twitter-tweet .date{
+	float: right;
+}
+
 .twitter-tweet p {
 	font-size: 16px;
 	font-weight: normal;
