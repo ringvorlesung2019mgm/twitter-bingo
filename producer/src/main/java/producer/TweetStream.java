@@ -4,6 +4,7 @@ import twitter4j.*;
 import twitter4j.auth.AccessToken;
 
 import java.io.Closeable;
+import java.util.List;
 
 /**
  * Connects to the twitter API and provides a stream of historical and new tweets.
@@ -86,8 +87,9 @@ public class TweetStream implements Closeable {
         q.setCount(count);
         try {
             QueryResult r = twitterClient.search(q);
-            for (Status s : r.getTweets()) {
-                l.onStatus(s);
+            List<Status> tweets = r.getTweets();
+            for (int i = tweets.size()-1; i >= 0; i--) {
+                l.onStatus(tweets.get(i));
             }
         } catch (TwitterException e) {
             e.printStackTrace();
