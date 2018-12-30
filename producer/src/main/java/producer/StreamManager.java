@@ -1,5 +1,9 @@
 package producer;
 
+import com.mongodb.connection.StreamFactory;
+
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -13,18 +17,18 @@ import java.util.concurrent.TimeUnit;
  */
 public class StreamManager {
 
-    private HashMap<Query, TweetStream> streams = new HashMap<>();
+    private HashMap<Query, Closeable> streams = new HashMap<>();
     private HashMap<Query, Integer> counts = new HashMap<>();
     private HashMap<Query, Long> sheduledRemovals = new HashMap<>();
-    private Properties properties;
     private ScheduledThreadPoolExecutor removalTaskSheduler;
     private static long cleanupTaskInterval = 60;
     private long removalTimeout = 5 * 60;
+    private IStreamFactory factory;
 
     static StreamManager instance;
 
-    private StreamManager(Properties properties) {
-        this.properties = properties;
+    private StreamManager(IStreamFactory factory) {
+        this.factory = factory;
         Runnable queryRemovalTask = new Runnable() {
 
             @Override
@@ -37,9 +41,9 @@ public class StreamManager {
 
     }
 
-    public static StreamManager getInstance(Properties properties) {
+    public static StreamManager getInstance(IStreamFactory factory) {
         if (instance == null) {
-            instance = new StreamManager(properties);
+            instance = new StreamManager(factory);
         }
         return instance;
     }
@@ -52,11 +56,7 @@ public class StreamManager {
     public synchronized void requestStream(Query q) {
         // if this user has already registered a query
         if (!streams.containsKey(q)) {
-            //TODO do not hard-code the topic
-            //TODO do something factory-pattern-like here. Decouple stream creation and management. (Let the caller decide how to create streams)
-            KafkaAdapter adap = new KafkaAdapter(properties, "tweets");
-            TweetStream stream = new TweetStream(properties.getProperty("twitter.consumer"), properties.getProperty("twitter.consumerSecret"), properties.getProperty("twitter.token"), properties.getProperty("twitter.tokenSecret"));
-            stream.stream(q, adap);
+            Closeable stream = factory.getStream(q);
             streams.put(q, stream);
             counts.put(q, 0);
         }
@@ -95,8 +95,13 @@ public class StreamManager {
             Map.Entry<Query, Long> entry = it.next();
             if (entry.getValue() < System.currentTimeMillis()) {
                 it.remove();
-                TweetStream stream = streams.get(entry.getKey());
-                stream.close();
+                Closeable stream = streams.get(entry.getKey());
+                try {
+                    stream.close();
+                }catch (IOException e){
+                    // TweetStreams can not throw IO-Exceptions on close.
+                    // Nothing to do here
+                }
                 streams.remove(entry.getKey());
                 counts.remove(entry.getKey());
             }
@@ -141,5 +146,32 @@ public class StreamManager {
      */
     public synchronized int currentUsage(Query q) {
         return counts.getOrDefault(q, 0);
+    }
+
+
+    /** Implementations of IStreamFactory can be passed to the StreamManager and will be used whenever the Manager needs to create a new stream.
+     * Because of this thing the user of StreamManager can decide how nd what kind of streams are created
+     * The only Method of the stream used by the Manager is close(),so returned objects can be of type Closeable to simplify Unit-testing.
+     */
+    public interface IStreamFactory{
+        Closeable getStream(Query q);
+    }
+
+
+    /** Implements IStreamFactory and creates TweetStreams coupled to a KafkaAdapter.
+     * Settings for TweetStream and KafkaAdapter are taken from the provided properties Object
+     *
+     */
+    public static class DefaultStreamFactory implements  IStreamFactory{
+        Properties properties;
+        public DefaultStreamFactory(Properties properties) {
+            this.properties = properties;
+        }
+        public Closeable getStream(Query q){
+            KafkaAdapter adap = new KafkaAdapter(properties, "tweets");
+            TweetStream stream = new TweetStream(properties.getProperty("twitter.consumer"), properties.getProperty("twitter.consumerSecret"), properties.getProperty("twitter.token"), properties.getProperty("twitter.tokenSecret"));
+            stream.stream(q, adap);
+            return stream;
+        }
     }
 }

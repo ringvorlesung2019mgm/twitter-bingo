@@ -19,7 +19,7 @@ import java.net.URLDecoder;
 public class TweetStreamServlet extends HttpServlet {
 
     PropertyManager pm = new PropertyManager();
-    StreamManager sm = StreamManager.getInstance(pm.allProperties());
+    StreamManager sm = StreamManager.getInstance(new StreamManager.DefaultStreamFactory(pm.allProperties()));
 
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         doPost(request, response);

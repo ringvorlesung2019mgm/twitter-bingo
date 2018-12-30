@@ -3,16 +3,28 @@ package producer;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.Properties;
 
 public class StreamManagerTest {
 
     @Test
     public void testAddRemove(){
-        PropertyManager pm = new PropertyManager();
-        Properties p = pm.allProperties();
+        StreamManager.IStreamFactory dummyFactory = new StreamManager.IStreamFactory() {
+            @Override
+            public Closeable getStream(Query q) {
+                return new Closeable() {
+                    @Override
+                    public void close() throws IOException {
+                        //do nothing here
+                    }
+                };
+            }
+        };
+
         StreamManager.setCleanupTaskInterval(1);
-        StreamManager m = StreamManager.getInstance(p);
+        StreamManager m = StreamManager.getInstance(dummyFactory);
         m.setRemovalTimeout(3);
 
         Assert.assertEquals(0,m.activeStreams());

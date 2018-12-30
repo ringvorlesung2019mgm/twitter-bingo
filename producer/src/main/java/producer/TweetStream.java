@@ -3,6 +3,7 @@ package producer;
 import twitter4j.*;
 import twitter4j.auth.AccessToken;
 
+import java.io.Closeable;
 
 /**
  * Connects to the twitter API and provides a stream of historical and new tweets.
@@ -11,7 +12,7 @@ import twitter4j.auth.AccessToken;
  * @see twitter4j.Twitter
  * @see twitter4j.TwitterStream
  */
-public class TweetStream {
+public class TweetStream implements Closeable {
     private Twitter twitterClient;
     private TwitterStream twitterStream;
 
