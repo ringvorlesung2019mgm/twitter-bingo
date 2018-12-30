@@ -29,61 +29,67 @@
             </p>
         </div>
 
-        <!-- Basic Statistics -->
-        <div id="basicStatistics" class="basicStats dashboardItem">
-            <div class="basicStatsContent">
-                <a>Total Tweets: </a>{{tweetCount}},<a> Positive Tweets: </a>40,<a> Negative Tweets: </a>40,<a> Average Sentiment: </a>{{averageRating}}</div>
-        </div>
+        <div id="results" ng-hide="state === 'IDLE'">
 
-        <!-- Diagram -->
-        <div id="chartContainer" class="diagramStyle dashboardItem"></div>
+            <!-- Basic Statistics -->
+            <div id="basicStatistics" class="basicStats dashboardItem">
+                <div class="basicStatsContent">
+                    <a>Total Tweets: </a>{{tweetCount}},<a> Positive Tweets: </a>{{numPositive}},<a> Negative Tweets:
+                    </a>{{numNegative}},<a>
+                        Average
+                        Sentiment: </a>{{averageRating.toFixed(2)}}</div>
+            </div>
 
-        <!-- Tweet-Window -->
-        <div id="tweetwindow" class="tweet-window dashboardItem">
-            <p class="dashboardItemHeading">Latest Tweets</p>
-            <div id="content">
-                <!-- Loading-indicator -->
-                <div ng-hide="state !== 'WAITING'" class="spinner">
-                    <div class="rect1"></div>
-                    <div class="rect2"></div>
-                    <div class="rect3"></div>
-                    <div class="rect4"></div>
-                    <div class="rect5"></div>
-                </div>
-                <!--loaded Tweets-->
-                <div class="list-item" ng-repeat="x in tweetArray track by x.id">
-                    <blockquote class="twitter-tweet">
-                        <p id='tweets' dir="ltr">{{x.text}}</p>
-                        {{x.author}}
-                        <a class="date"> {{x.createdAt.toLocaleString()}}</a>
-                    </blockquote>
-                    <div class="sentiment-number" ng-class="{positive: x.ranking > 0, negative: x.ranking < 0}">
-                        {{x.ranking}}</div>
+            <!-- Diagram -->
+            <div id="chartContainer" class="diagramStyle dashboardItem"></div>
+
+            <!-- Tweet-Window -->
+            <div id="tweetwindow" class="tweet-window dashboardItem">
+                <p class="dashboardItemHeading">Latest Tweets</p>
+                <div id="content">
+                    <!-- Loading-indicator -->
+                    <div ng-hide="state !== 'WAITING'" class="spinner">
+                        <div class="rect1"></div>
+                        <div class="rect2"></div>
+                        <div class="rect3"></div>
+                        <div class="rect4"></div>
+                        <div class="rect5"></div>
+                    </div>
+                    <!--loaded Tweets-->
+                    <div class="list-item" ng-repeat="x in tweetArray track by x.id">
+                        <blockquote class="twitter-tweet">
+                            <p id='tweets' dir="ltr">{{x.text}}</p>
+                            {{x.author}}
+                            <a class="date"> {{x.createdAt.toLocaleString()}}</a>
+                        </blockquote>
+                        <div class="sentiment-number" ng-class="{positive: x.rating > 0, negative: x.rating < 0}">
+                            {{x.rating.toFixed(0)}}</div>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Positive & Negative Tweets -->
-        <div id="positiveTweet" class="extremeTweetWindow dashboardItem">
-            <p class="dashboardItemHeading">Most Positive Tweet</p>
-            <blockquote class="twitter-tweet">
-                <p id='tweets' dir="ltr">x.text</p>
-                x.author
-                <a class="date">x.createdAt.toLocaleString</a>
-            </blockquote>
-            <div class="sentiment-number" ng-class="{positive: x.ranking > 0, negative: x.ranking < 0}">
-                0</div>
-        </div>
+            <!-- Positive & Negative Tweets -->
+            <div id="positiveTweet" class="extremeTweetWindow dashboardItem">
+                <p class="dashboardItemHeading">Most Positive Tweet</p>
+                <blockquote class="twitter-tweet">
+                    <p id='tweets' dir="ltr">{{highestRatedTweet.text}}</p>
+                    {{highestRatedTweet.author}}
+                    <a class="date">{{highestRatedTweet.createdAt.toLocaleString()}}</a>
+                </blockquote>
+                <div class="sentiment-number" ng-class="{positive: highestRatedTweet.rating > 0, negative: highestRatedTweet.rating < 0}">
+                    {{highestRatedTweet.rating.toFixed(0)}}</div>
+            </div>
 
-        <div id="negativeTweet" class="extremeTweetWindow dashboardItem">
-            <p class="dashboardItemHeading">Most Negative Tweet</p>
-            <blockquote class="twitter-tweet">
-                <p id='tweets' dir="ltr">x.text</p>
-                x.author
-                <a class="date">x.createdAt.toLocaleString</a>
-            </blockquote>
-            <div class="sentiment-number" ng-class="{positive: x.ranking > 0, negative: x.ranking < 0}">
-                0</div>
+            <div id="negativeTweet" class="extremeTweetWindow dashboardItem">
+                <p class="dashboardItemHeading">Most Negative Tweet</p>
+                <blockquote class="twitter-tweet">
+                    <p id='tweets' dir="ltr">{{lowestRatedTweet.text}}</p>
+                    {{lowestRatedTweet.author}}
+                    <a class="date">{{lowestRatedTweet.createdAt.toLocaleString()}}</a>
+                </blockquote>
+                <div class="sentiment-number" ng-class="{positive: lowestRatedTweet.rating > 0, negative: lowestRatedTweet.rating < 0}">
+                    {{lowestRatedTweet.rating.toFixed(0)}}</div>
+            </div>
         </div>
     </div>
 </body>

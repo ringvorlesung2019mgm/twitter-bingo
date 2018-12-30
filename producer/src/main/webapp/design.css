@@ -35,7 +35,6 @@ div {
 }
 
 .dashboardItem{
-     visibility: hidden;
  	 border-color: lightgrey;
 	 border-width: 1px;
 	 border-style: solid;
