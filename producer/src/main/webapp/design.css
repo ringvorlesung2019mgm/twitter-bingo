@@ -46,7 +46,7 @@ div {
 #basicStatistics{
      display: table;
      height:30px;
-     width: 100%;
+     width: 98%;
    }
 
 .basicStatsContent{
@@ -62,7 +62,7 @@ div {
 /*diagram*/
 .diagramStyle{
     height: 300px;
-    width: 100%;
+    width: 98%;
 }
 
 
