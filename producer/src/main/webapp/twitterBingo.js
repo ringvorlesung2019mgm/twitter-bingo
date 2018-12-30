@@ -29,7 +29,8 @@ angular.module('tweetApp').controller('tweetStream', function ($scope) {
 
 	$scope.loadHashtag = function () {
 	    $scope.tweetCount = 0;
-        var averageRating = 0;
+        $scope.averageRating = 0;
+        sumRating=0;
 	    document.getElementById("tweetwindow").style.visibility = "visible";
 	    document.getElementById("basicStatistics").style.visibility = "visible";
 	    document.getElementById("chartContainer").style.visibility = "visible";
@@ -48,7 +49,6 @@ angular.module('tweetApp').controller('tweetStream', function ($scope) {
 
 	// based on https://stackoverflow.com/questions/33635919/xmlhttprequest-chunked-response-only-read-last-response-in-progress
 	function openTweetStreamConnection(hashtag) {
-
 		var last_index = 0;
 		//if there is already a stream-request running abort it, before replacing it with a new one
 		if ($scope.streamRequest != null) {
@@ -77,8 +77,8 @@ angular.module('tweetApp').controller('tweetStream', function ($scope) {
 					receivedTweets.push(s);
 					sumRating += s.rating;
 					$scope.tweetCount += 1;
-					averageRating = sumRating / $scope.tweetCount;
-					$scope.averageRatingFinal = (averageRating.toFixed(3))*10;
+					$scope.averageRating = sumRating / $scope.tweetCount;
+					$scope.averageRating = ($scope.averageRating.toFixed(3))*10;
 					if (lowestRatedTweet == null || s.rating <= lowestRatedTweet.rating) {
 						lowestRatedTweet = s;
 					}
