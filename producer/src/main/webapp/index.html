@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8" />
-    <title>Twitter Bingo</title>
+    <title>Twitter-Bingo</title>
     <script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
         crossorigin="anonymous">
         </script>
@@ -17,9 +17,7 @@
 <body>
     <div ng-app="tweetApp" ng-controller="tweetStream">
         <!-- Headline -->
-        <div>
-            <h1>Twitter-Bingo1</h1>
-        </div>
+        <h1>twingo</h1>
 
         <!-- Hashtag-Input -->
         <div>
@@ -30,11 +28,19 @@
                 </form>
             </p>
         </div>
+
+        <!-- Basic Statistics -->
+        <div id="basicStatistics" class="basicStats dashboardItem">
+            <div class="basicStatsContent">
+                <a>Total Tweets: </a>{{tweetCount}},<a> Positive Tweets: </a>40,<a> Negative Tweets: </a>40,<a> Average Sentiment: </a>{{averageRatingFinal}}</div>
+        </div>
+
         <!-- Diagram -->
-        <div id="chartContainer" style="height: 300px; width: 100%;"></div>
+        <div id="chartContainer" class="diagramStyle dashboardItem"></div>
 
         <!-- Tweet-Window -->
-        <div id="tweetwindow" class="tweet-window">
+        <div id="tweetwindow" class="tweet-window dashboardItem">
+            <p class="dashboardItemHeading">Latest Tweets</p>
             <div id="content">
                 <!-- Loading-indicator -->
                 <div ng-hide="state !== 'WAITING'" class="spinner">
@@ -55,6 +61,29 @@
                         {{x.ranking}}</div>
                 </div>
             </div>
+        </div>
+
+        <!-- Positive & Negative Tweets -->
+        <div id="positiveTweet" class="extremeTweetWindow dashboardItem">
+            <p class="dashboardItemHeading">Most Positive Tweet</p>
+            <blockquote class="twitter-tweet">
+                <p id='tweets' dir="ltr">x.text</p>
+                x.author
+                <a class="date">x.createdAt.toLocaleString</a>
+            </blockquote>
+            <div class="sentiment-number" ng-class="{positive: x.ranking > 0, negative: x.ranking < 0}">
+                0</div>
+        </div>
+
+        <div id="negativeTweet" class="extremeTweetWindow dashboardItem">
+            <p class="dashboardItemHeading">Most Negative Tweet</p>
+            <blockquote class="twitter-tweet">
+                <p id='tweets' dir="ltr">x.text</p>
+                x.author
+                <a class="date">x.createdAt.toLocaleString</a>
+            </blockquote>
+            <div class="sentiment-number" ng-class="{positive: x.ranking > 0, negative: x.ranking < 0}">
+                0</div>
         </div>
     </div>
 </body>

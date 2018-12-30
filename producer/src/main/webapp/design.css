@@ -1,6 +1,23 @@
+body{
+    background-color: #e8f5fd;
+}
+
+/*Heading*/
 h1 {
-	font-family: Arial;
+	font-family: Picobla, Arial;
 	text-align: center;
+	color: #2fcdff;
+	font-size:80px;
+	margin: 20px;
+}
+
+/*twitter font*/
+@font-face{
+font-family: 'Picobla';
+src: url('fonts/picobla.ttf') format('truetype'),
+url('fonts/picobla.woff') format('woff'),
+url('fonts/picobla.woff2') format('woff2'),
+url('fonts/picobla.eot') format('embedded-opentype');
 }
 
 div {
@@ -17,6 +34,66 @@ div {
 	margin-bottom: 30px
 }
 
+.dashboardItem{
+     visibility: hidden;
+ 	 border-color: lightgrey;
+	 border-width: 1px;
+	 border-style: solid;
+     background-color: white;
+     margin: 1%;
+}
+
+/*basic statistics*/
+#basicStatistics{
+     display: table;
+     height:30px;
+     width: 100%;
+   }
+
+.basicStatsContent{
+     display: table-cell;
+     text-align: center;
+     vertical-align: middle;
+ }
+
+.basicStatsContent a{
+   font-weight: bold;
+}
+
+/*diagram*/
+.diagramStyle{
+    height: 300px;
+    width: 100%;
+}
+
+
+/*tweet window*/
+.tweet-window {
+	height: 400px;
+	width: 47%;
+	overflow-x: hidden;
+	overflow-y: scroll;
+	scrollbar-base-color: grey;
+	font-family: sans-serif;
+	padding: 10px;
+	float:left;
+	margin-right:0.5%;
+}
+
+/*most positive and most negative tweet*/
+.extremeTweetWindow{
+    float:right;
+    width: 47%;
+    margin-left:0.5%;
+}
+
+.dashboardItemHeading{
+    font-weight:bold;
+    text-align: center;
+    margin:5px;
+}
+
+/*tweet design*/
 .twitter-tweet {
 	display: inline-block;
 	font-family: "Helvetica Neue", Roboto, "Segoe UI", Calibri, sans-serif;
@@ -29,8 +106,8 @@ div {
 	border-width: 1px;
 	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
 	margin: 10px 5px;
-	padding: 16px 16px 16px;
-	width: 415px;
+	padding: 4px;
+	width: 85%;
 	float: left;
 	background-color: inherit;
 }
@@ -52,10 +129,7 @@ div {
 	outline: 0 none;
 }
 
-.twitter-tweet a:hover, blockquote.twitter-tweet a:focus {
-	text-decoration: underline;
-}
-
+/*sentiment number*/
 .sentiment-number {
 	margin: 0px;
 	padding: 12px 16px 10px 16px;
@@ -78,20 +152,6 @@ div {
 
 .sentiment-number.negative {
 	background-color:red;
-}
-
-.tweet-window {
-    visibility: hidden;
-	border-color: black;
-	border-width: 2px;
-	border-style: solid;
-	height: 400px;
-	width: 530px;
-	overflow-x: hidden;
-	overflow-y: scroll;
-	scrollbar-base-color: grey;
-	font-family: sans-serif;
-	padding: 10px;
 }
 
 /* CSS for loading-indicator */

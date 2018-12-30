@@ -7,9 +7,7 @@ Number.prototype.between = function (a, b) {
 var receivedTweets = [];
 var lowestRatedTweet = null;
 var highestRatedTweet = null;
-var averageRating;
 var sumRating = 0;
-var tweetCount = 0;
 var differanceSpan = 0;
 const lowCriteria = {
 	low: -1,
@@ -30,7 +28,13 @@ angular.module('tweetApp').controller('tweetStream', function ($scope) {
 	$scope.state = "IDLE"
 
 	$scope.loadHashtag = function () {
+	    $scope.tweetCount = 0;
+        var averageRating = 0;
 	    document.getElementById("tweetwindow").style.visibility = "visible";
+	    document.getElementById("basicStatistics").style.visibility = "visible";
+	    document.getElementById("chartContainer").style.visibility = "visible";
+	    document.getElementById("positiveTweet").style.visibility = "visible";
+	    document.getElementById("negativeTweet").style.visibility = "visible";
 		if ($scope.hashtag !== "" && $scope.hashtag !== null) {
 			openTweetStreamConnection($scope.hashtag);
 		} else {
@@ -72,8 +76,9 @@ angular.module('tweetApp').controller('tweetStream', function ($scope) {
 					s = JSON.parse(ms[i])
 					receivedTweets.push(s);
 					sumRating += s.rating;
-					tweetCount += 1;
-					averageRating = sumRating / tweetCount;
+					$scope.tweetCount += 1;
+					averageRating = sumRating / $scope.tweetCount;
+					$scope.averageRatingFinal = (averageRating.toFixed(3))*10;
 					if (lowestRatedTweet == null || s.rating <= lowestRatedTweet.rating) {
 						lowestRatedTweet = s;
 					}
@@ -104,7 +109,7 @@ angular.module('tweetApp').controller('tweetStream', function ($scope) {
 					var tweetObject = {
 						id: s.id['$numberLong'],
 						text: tweetText,
-						ranking: rankingDecimal,
+						ranking: rankingDecimal*10,
 						author: tweetAuthor,
 						createdAt: new Date(s.createdAt["$date"])
 					};
@@ -140,16 +145,13 @@ angular.module('tweetApp').controller('tweetStream', function ($scope) {
 
 	function loadChart(chartArray) {
     var chart = new CanvasJS.Chart("chartContainer", {
-    	animationEnabled: true,
+    	animationEnabled: false,
     	theme: "light2",
     	title:{
     		text: "Time Analysis"
 
     	},
     	axisY:{
-			labelFormatter: function(e){
-				return e.value/10;
-			},
 			stripLines: [{value:0}]
     	},
     	axisX:{
