@@ -63,7 +63,7 @@
                             <a class="date"> {{x.createdAt.toLocaleString()}}</a>
                         </blockquote>
                         <div class="sentiment-number" ng-class="{positive: x.rating > 0, negative: x.rating < 0}">
-                            {{x.rating.toFixed(0)}}</div>
+                            {{x.rating.toFixed(1)}}</div>
                     </div>
                 </div>
             </div>
@@ -77,7 +77,7 @@
                     <a class="date">{{highestRatedTweet.createdAt.toLocaleString()}}</a>
                 </blockquote>
                 <div class="sentiment-number" ng-class="{positive: highestRatedTweet.rating > 0, negative: highestRatedTweet.rating < 0}">
-                    {{highestRatedTweet.rating.toFixed(0)}}</div>
+                    {{highestRatedTweet.rating.toFixed(1)}}</div>
             </div>
 
             <div id="negativeTweet" class="extremeTweetWindow dashboardItem">
@@ -88,7 +88,7 @@
                     <a class="date">{{lowestRatedTweet.createdAt.toLocaleString()}}</a>
                 </blockquote>
                 <div class="sentiment-number" ng-class="{positive: lowestRatedTweet.rating > 0, negative: lowestRatedTweet.rating < 0}">
-                    {{lowestRatedTweet.rating.toFixed(0)}}</div>
+                    {{lowestRatedTweet.rating.toFixed(1)}}</div>
             </div>
         </div>
     </div>

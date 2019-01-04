@@ -54,7 +54,7 @@ angular.module('tweetApp').controller('tweetStream', function ($scope) {
 					var tweetObject = {
 						id: s.id['$numberLong'],
 						text: s.text,
-						rating: s.rating *10,
+						rating: s.rating,
 						author: tweetAuthor,
 						createdAt: new Date(s.createdAt["$date"])
 					};
