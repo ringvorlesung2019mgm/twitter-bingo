@@ -15,6 +15,7 @@ angular.module('tweetApp').controller('tweetStream', function ($scope) {
 		$scope.highestRatedTweet = null;
 		$scope.numPositive = 0;
 		$scope.numNegative = 0;
+		$scope.ratingArray =[];
 
 		//Abort currently running request
 		if ($scope.streamRequest != null) {
@@ -53,7 +54,7 @@ angular.module('tweetApp').controller('tweetStream', function ($scope) {
 					var tweetObject = {
 						id: s.id['$numberLong'],
 						text: s.text,
-						rating: s.rating * 10,
+						rating: s.rating *10,
 						author: tweetAuthor,
 						createdAt: new Date(s.createdAt["$date"])
 					};
@@ -64,6 +65,7 @@ angular.module('tweetApp').controller('tweetStream', function ($scope) {
 					$scope.tweetCount += 1;
 					$scope.averageRating = $scope.sumRating / $scope.tweetCount;
 					$scope.averageRating = ($scope.averageRating);
+					$scope.ratingArray.push(s.rating);
 
 					if ($scope.lowestRatedTweet == null || tweetObject.rating <= $scope.lowestRatedTweet.rating) {
 						$scope.lowestRatedTweet = tweetObject;
@@ -79,13 +81,24 @@ angular.module('tweetApp').controller('tweetStream', function ($scope) {
 					if (s.rating > 0) {
 						$scope.numPositive++
 					}
+                    var windowRatingTotal = 0;
+                    var windowRatingSum = 0;
+                    var tempRating = 0;
 
-					var chartObject = {
-						x: new Date(s.createdAt["$date"]),
-						y: s.rating
-					}
+                    if ($scope.tweetCount >= 5){
+                        for (var h = 0; h<5;h++){
+                             tempRating = $scope.ratingArray[$scope.tweetCount-h-1];
+                             windowRatingSum = windowRatingSum + tempRating
+                        }
 
-					chartArray.push(chartObject);
+                        windowRatingTotal= windowRatingSum*1.0/5;
+
+					    var chartObject = {
+						    x: new Date(s.createdAt["$date"]),
+						    y:  windowRatingTotal
+					    }
+					    chartArray.push(chartObject);
+                    }
 
 					console.log("POST /api/TweetStream Tweet received");
 				}
