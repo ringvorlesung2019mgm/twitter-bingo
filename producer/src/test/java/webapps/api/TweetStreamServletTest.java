@@ -10,6 +10,7 @@ import org.mockito.stubbing.Answer;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -37,6 +38,8 @@ public class TweetStreamServletTest {
         request = mock(HttpServletRequest.class);
         response = mock(HttpServletResponse.class);
 
+        Mockito.when(request.getSession()).thenReturn(mock(HttpSession.class));
+        Mockito.when(request.getSession().getId()).thenReturn("Ich bin ein Test");
         Mockito.when(request.getParameter("q")).thenReturn(null);
 
         TweetStreamServlet tweetStreamServlet = new TweetStreamServlet();
