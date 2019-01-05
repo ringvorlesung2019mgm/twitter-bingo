@@ -15,7 +15,7 @@ angular.module('tweetApp').controller('tweetStream', function ($scope) {
 		$scope.highestRatedTweet = null;
 		$scope.numPositive = 0;
 		$scope.numNegative = 0;
-		$scope.ratingArray =[];
+		$scope.ratingArray = [];
 
 		//Abort currently running request
 		if ($scope.streamRequest != null) {
@@ -26,6 +26,23 @@ angular.module('tweetApp').controller('tweetStream', function ($scope) {
 			openTweetStreamConnection($scope.hashtag);
 		}
 	};
+
+	function Tweet(id, text, rating, author, createdAt) {
+		this.id = id
+		this.text = text
+		this.rating = rating
+		this.author = author
+		this.createdAt = createdAt
+	}
+	Tweet.prototype.ratingText = function () {
+		return this.rating.toFixed(1)
+	}
+	Tweet.prototype.isPositive = function () {
+		return parseFloat(this.rating.toFixed(1)) > 0
+	}
+	Tweet.prototype.isNegative = function () {
+		return parseFloat(this.rating.toFixed(1)) < 0
+	}
 
 	// based on https://stackoverflow.com/questions/33635919/xmlhttprequest-chunked-response-only-read-last-response-in-progress
 	function openTweetStreamConnection(hashtag) {
@@ -51,14 +68,7 @@ angular.module('tweetApp').controller('tweetStream', function ($scope) {
 					s = JSON.parse(ms[i])
 					var tweetAuthor = "- " + s.userName;
 
-					var tweetObject = {
-						id: s.id['$numberLong'],
-						text: s.text,
-						rating: s.rating,
-						author: tweetAuthor,
-						createdAt: new Date(s.createdAt["$date"])
-					};
-
+					var tweetObject = new Tweet(s.id['$numberLong'], s.text, s.rating, tweetAuthor, new Date(s.createdAt["$date"]))
 					$scope.tweetArray.unshift(tweetObject);
 
 					$scope.sumRating += s.rating;
@@ -81,24 +91,24 @@ angular.module('tweetApp').controller('tweetStream', function ($scope) {
 					if (s.rating > 0) {
 						$scope.numPositive++
 					}
-                    var windowRatingTotal = 0;
-                    var windowRatingSum = 0;
-                    var tempRating = 0;
+					var windowRatingTotal = 0;
+					var windowRatingSum = 0;
+					var tempRating = 0;
 
-                    if ($scope.tweetCount >= 5){
-                        for (var h = 0; h<5;h++){
-                             tempRating = $scope.ratingArray[$scope.tweetCount-h-1];
-                             windowRatingSum = windowRatingSum + tempRating
-                        }
+					if ($scope.tweetCount >= 5) {
+						for (var h = 0; h < 5; h++) {
+							tempRating = $scope.ratingArray[$scope.tweetCount - h - 1];
+							windowRatingSum = windowRatingSum + tempRating
+						}
 
-                        windowRatingTotal= windowRatingSum*1.0/5;
+						windowRatingTotal = windowRatingSum * 1.0 / 5;
 
-					    var chartObject = {
-						    x: new Date(s.createdAt["$date"]),
-						    y:  windowRatingTotal
-					    }
-					    chartArray.push(chartObject);
-                    }
+						var chartObject = {
+							x: new Date(s.createdAt["$date"]),
+							y: windowRatingTotal
+						}
+						chartArray.push(chartObject);
+					}
 
 					console.log("POST /api/TweetStream Tweet received");
 				}

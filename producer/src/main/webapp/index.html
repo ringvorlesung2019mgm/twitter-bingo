@@ -62,8 +62,8 @@
                             {{x.author}}
                             <a class="date"> {{x.createdAt.toLocaleString()}}</a>
                         </blockquote>
-                        <div class="sentiment-number" ng-class="{positive: x.rating > 0, negative: x.rating < 0}">
-                            {{x.rating.toFixed(1)}}</div>
+                        <div class="sentiment-number" ng-class="{positive: x.isPositive(), negative: x.isNegative()}">
+                            {{x.ratingText()}}</div>
                     </div>
                 </div>
             </div>
@@ -76,8 +76,8 @@
                     {{highestRatedTweet.author}}
                     <a class="date">{{highestRatedTweet.createdAt.toLocaleString()}}</a>
                 </blockquote>
-                <div class="sentiment-number" ng-class="{positive: highestRatedTweet.rating > 0, negative: highestRatedTweet.rating < 0}">
-                    {{highestRatedTweet.rating.toFixed(1)}}</div>
+                <div class="sentiment-number" ng-class="{positive: highestRatedTweet.isPositive(), negative: highestRatedTweet.isNegative()}">
+                    {{highestRatedTweet.ratingText()}}</div>
             </div>
 
             <div id="negativeTweet" class="extremeTweetWindow dashboardItem">
@@ -87,8 +87,8 @@
                     {{lowestRatedTweet.author}}
                     <a class="date">{{lowestRatedTweet.createdAt.toLocaleString()}}</a>
                 </blockquote>
-                <div class="sentiment-number" ng-class="{positive: lowestRatedTweet.rating > 0, negative: lowestRatedTweet.rating < 0}">
-                    {{lowestRatedTweet.rating.toFixed(1)}}</div>
+                <div class="sentiment-number" ng-class="{positive: lowestRatedTweet.isPositive(), negative: lowestRatedTweet.isNegative()}">
+                    {{lowestRatedTweet.ratingText()}}</div>
             </div>
         </div>
     </div>
